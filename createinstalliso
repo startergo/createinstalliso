@@ -118,9 +118,6 @@ declare g_replace_code_signatures_in_installer_application="false"
 # 10.16.x.
 unset SYSTEM_VERSION_COMPAT
 
-# Ensures that 'ditto' does not automatically add some options.
-unset DITTONORSRC
-
 unset g_tmp_directory
 unset g_install_esd_mountpoint
 unset g_install_disk_mountpoint
@@ -500,7 +497,7 @@ main() {
     modified_installer_application_path="${g_tmp_directory}/InstallerApplication/${installer_application_basename}"
 
     echo "Copying installer application..."
-    ditto "${original_installer_application_path}" "${modified_installer_application_path}" >/dev/null || exit_with_status 220 "Failed to copy installer application."
+    ditto --rsrc --extattr --acl "${original_installer_application_path}" "${modified_installer_application_path}" >/dev/null || exit_with_status 220 "Failed to copy installer application."
     xattr -drs "com.apple.quarantine" "${modified_installer_application_path}" >/dev/null || exit_with_status 219 "Failed to remove extended attribute com.apple.quarantine."
 
     if [[ "${g_patch_macos_sierra_installer_application}" == "true" ]]; then
