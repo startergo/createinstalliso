@@ -687,6 +687,7 @@ set_traps() {
   #  6 - SIGABRT
   # 15 - SIGTERM
   for signal_number in 1 2 3 6 15; do
+    # shellcheck disable=SC2064
     trap "signal_handler ${signal_number}" "${signal_number}"
   done
 }
@@ -697,6 +698,7 @@ set_environment_variables() {
   # Ensures that 'sw_vers' uses Apple's new naming scheme for macOS
   # versions (i.e. macOS Big Sur reports version 11.x.y instead of
   # version 10.16.x).
+  # bashsupport disable=BP5006
   unset SYSTEM_VERSION_COMPAT
 }
 
@@ -872,9 +874,11 @@ print_error_usage() {
 create_example_installer_application_name() {
   local -r -i number_of_elements="${#SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[@]}"
   local item="${SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[${number_of_elements} - 1]}"
-  local example_installer_application_name="$(get_trimmed_field_content "${item}" 1).app"
+  local example_installer_application_name
   local -i i
   local installer_application_name
+
+  example_installer_application_name="$(get_trimmed_field_content "${item}" 1).app"
 
   for ((i = number_of_elements - 1; i >= 0; i--)); do
     item="${SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[${i}]}"
