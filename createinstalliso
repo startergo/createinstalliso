@@ -26,10 +26,10 @@ fi
 # Global variables
 # ======================================================================
 
-declare -r SCRIPT_NAME="createinstalliso"
-declare -r SCRIPT_VERSION="develop"
-declare -r MINIMUM_REQUIRED_MACOS_VERSION_STRING="10.6"
-declare -r -i ROOT_UID=0
+readonly SCRIPT_NAME="createinstalliso"
+readonly SCRIPT_VERSION="develop"
+readonly MINIMUM_REQUIRED_MACOS_VERSION_STRING="10.6"
+readonly ROOT_UID=0
 
 # List of unsupported macOS versions.
 #
@@ -38,7 +38,7 @@ declare -r -i ROOT_UID=0
 # or later. However, on Mac OS X 10.5 Leopard, PlistBuddy does not
 # handle large integer values correctly. Therefore, this script requires
 # Mac OS X 10.6 Snow Leopard or later.
-declare -r -a UNSUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
+readonly -a UNSUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
   '^10\.0(\.[[:digit:]]+)?$' # Mac OS X Cheetah      10.0
   '^10\.1(\.[[:digit:]]+)?$' # Mac OS X Puma         10.1
   '^10\.2(\.[[:digit:]]+)?$' # Mac OS X Jaguar       10.2
@@ -48,7 +48,7 @@ declare -r -a UNSUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
 )
 
 # List of all supported macOS versions.
-declare -r -a SUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
+readonly -a SUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
   '^10\.6(\.[[:digit:]]+)?$'            # Mac OS X Snow Leopard 10.6
   '^10\.7(\.[[:digit:]]+)?$'            # Mac OS X Lion         10.7
   '^10\.8(\.[[:digit:]]+)?$'            # OS X Mountain Lion    10.8
@@ -72,7 +72,7 @@ declare -r -a SUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
 # 'get_offset_for_iso_directory_path'). The columns are separated by the
 # '#' character. The disk space offset requirements are specified in
 # megabytes.
-declare -r -a SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS=(
+readonly -a SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS=(
   'Install Mac OS X Lion      #      #     ' # 10.7
   'Install OS X Mountain Lion #      #     ' # 10.8
   'Install OS X Mavericks     #      #     ' # 10.9
@@ -91,7 +91,7 @@ declare -r -a SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS=(
 
 # List of all known macOS version names and their corresponding version
 # string regex. The columns are separated by the '#' character.
-declare -r -a KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX=(
+readonly -a KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX=(
   '^10\.0(\.[[:digit:]]+)?$            # Mac OS X Cheetah'      # 10.0
   '^10\.1(\.[[:digit:]]+)?$            # Mac OS X Puma'         # 10.1
   '^10\.2(\.[[:digit:]]+)?$            # Mac OS X Jaguar'       # 10.2
