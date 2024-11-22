@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # ======================================================================
-# Global variables
+# Global constants
 # ======================================================================
 
 readonly SCRIPT_NAME="createinstalliso"
@@ -110,14 +110,17 @@ readonly -a KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX=(
   '^15\.[[:digit:]]+(\.[[:digit:]]+)?$ # macOS Sequoia'         # 15
 )
 
-declare g_patch_macos_sierra_installer_application="false"
-declare g_replace_code_signatures_in_installer_application="false"
+# ======================================================================
+# Global variables
+# ======================================================================
 
-unset g_tmp_directory
-unset g_install_esd_mountpoint
-unset g_install_disk_mountpoint
-unset g_install_disk_device_node
-unset g_incomplete_iso_destination_image
+declare g_patch_macos_sierra_installer_application
+declare g_replace_code_signatures_in_installer_application
+declare g_tmp_directory
+declare g_install_esd_mountpoint
+declare g_install_disk_mountpoint
+declare g_install_disk_device_node
+declare g_incomplete_iso_destination_image
 
 # ======================================================================
 # Main function
@@ -127,6 +130,7 @@ main() {
   set_shell_options
   set_traps
   set_environment_variables
+  set_global_variables
 
   # ------------------------------------------------------------------
   # Check operating system requirements
@@ -1203,6 +1207,20 @@ set_environment_variables() {
   # versions (i.e. macOS Big Sur reports version 11.x.y instead of
   # version 10.16.x).
   unset SYSTEM_VERSION_COMPAT
+}
+
+##
+## @brief      Sets the global variables.
+##
+set_global_variables() {
+  g_patch_macos_sierra_installer_application="false"
+  g_replace_code_signatures_in_installer_application="false"
+
+  unset g_tmp_directory
+  unset g_install_esd_mountpoint
+  unset g_install_disk_mountpoint
+  unset g_install_disk_device_node
+  unset g_incomplete_iso_destination_image
 }
 
 ##
