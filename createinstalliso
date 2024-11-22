@@ -113,11 +113,6 @@ readonly -a KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX=(
 declare g_patch_macos_sierra_installer_application="false"
 declare g_replace_code_signatures_in_installer_application="false"
 
-# Ensures that 'sw_vers' uses Apple's new naming scheme for macOS
-# versions. E.g. macOS Big Sur reports version 11.x.y instead of
-# 10.16.x.
-unset SYSTEM_VERSION_COMPAT
-
 unset g_tmp_directory
 unset g_install_esd_mountpoint
 unset g_install_disk_mountpoint
@@ -131,6 +126,7 @@ unset g_incomplete_iso_destination_image
 main() {
   set_shell_options
   set_traps
+  set_environment_variables
 
   # ------------------------------------------------------------------
   # Check operating system requirements
@@ -1198,6 +1194,15 @@ set_traps() {
   for signal_number in 1 2 3 6 15; do
     trap "signal_handler ${signal_number}" "${signal_number}"
   done
+}
+
+## @brief      Sets the environment variables.
+##
+set_environment_variables() {
+  # Ensures that 'sw_vers' uses Apple's new naming scheme for macOS
+  # versions (i.e. macOS Big Sur reports version 11.x.y instead of
+  # version 10.16.x).
+  unset SYSTEM_VERSION_COMPAT
 }
 
 ##
