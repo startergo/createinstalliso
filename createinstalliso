@@ -159,8 +159,8 @@ echo_n() {
 ## @return     The basename of the file or directory.
 ##
 get_basename() {
-  local -r file_or_directory="$1"
-  local basename
+  local +x -r file_or_directory="$1"
+  local +x basename
 
   basename="${file_or_directory%/}"
   basename="${basename##*/}"
@@ -174,7 +174,7 @@ get_basename() {
 ## @return     The operating system name.
 ##
 get_os_name() {
-  local os_name
+  local +x os_name
 
   os_name="$(uname -s 2>/dev/null)" || return 1
 
@@ -191,15 +191,15 @@ get_os_name() {
 ##             architectures.
 ##
 get_mach_o_executable_architectures() {
-  local -r file="$1"
-  local file_output_with_colon_separator
-  local file_output_with_space_separator
-  local -i output_length
-  local -i i
-  local file_path_in_output
-  local file_output_without_file_path
-  local file_output_line_without_file_path
-  local -a executable_architectures=()
+  local +x -r file="$1"
+  local +x file_output_with_colon_separator
+  local +x file_output_with_space_separator
+  local +x -i output_length
+  local +x -i i
+  local +x file_path_in_output
+  local +x file_output_without_file_path
+  local +x file_output_line_without_file_path
+  local +x -a executable_architectures=()
 
   is_not_empty "${file}" || return 1
   is_file "${file}" || return 1
@@ -246,8 +246,8 @@ get_mach_o_executable_architectures() {
 ## @return     The available disk space in bytes.
 ##
 get_available_disk_space() {
-  local -r file_or_directory="$1"
-  local -i available_kilobytes
+  local +x -r file_or_directory="$1"
+  local +x -i available_kilobytes
 
   is_not_empty "${file_or_directory}" || return 1
 
@@ -264,8 +264,8 @@ get_available_disk_space() {
 ## @return     The disk space used by the file or directory in bytes.
 ##
 get_disk_space_used_by_file_or_directory() {
-  local -r file_or_directory="$1"
-  local -i used_kilobytes
+  local +x -r file_or_directory="$1"
+  local +x -i used_kilobytes
 
   is_not_empty "${file_or_directory}" || return 1
 
@@ -284,8 +284,8 @@ get_disk_space_used_by_file_or_directory() {
 ## @return     The volume name.
 ##
 get_volume_name() {
-  local -r file_or_directory="$1"
-  local volume_name
+  local +x -r file_or_directory="$1"
+  local +x volume_name
 
   is_not_empty "${file_or_directory}" || return 1
 
@@ -304,7 +304,7 @@ get_volume_name() {
 ## @return     The root volume name.
 ##
 get_root_volume_name() {
-  local plist_file
+  local +x plist_file
 
   is_not_empty "${g_tmp_directory-}" || return 1
 
@@ -334,7 +334,7 @@ is_apple_silicon_mac() {
 ##                   the file path portion removed.
 ##
 is_mach_o_universal_binary() {
-  local -r file_output_without_file_path="$1"
+  local +x -r file_output_without_file_path="$1"
 
   echo "${file_output_without_file_path%%$'\n'*}" | grep -E "^:[[:space:]]+Mach-O universal binary with [0-9]+ architectures" >/dev/null
 }
@@ -348,7 +348,7 @@ is_mach_o_universal_binary() {
 ##                   the file path portion removed.
 ##
 is_mach_o_executable() {
-  local -r file_output_line_without_file_path="$1"
+  local +x -r file_output_line_without_file_path="$1"
 
   echo "${file_output_line_without_file_path}" | grep -E "Mach-O( 64-bit | )executable [^ ]+$" >/dev/null
 }
@@ -363,7 +363,7 @@ is_mach_o_executable() {
 ## @retval     `false`  Otherwise.
 ##
 is_macos() {
-  local -r os_name="$1"
+  local +x -r os_name="$1"
 
   is_not_empty "${os_name}" || return 1
 
@@ -389,7 +389,7 @@ is_root() {
 ## @retval     `false`  Otherwise.
 ##
 is_existing() {
-  local -r file_or_directory="$1"
+  local +x -r file_or_directory="$1"
 
   [[ -e "${file_or_directory}" ]]
 }
@@ -403,7 +403,7 @@ is_existing() {
 ## @retval     `false`  Otherwise.
 ##
 is_file() {
-  local -r file_or_directory="$1"
+  local +x -r file_or_directory="$1"
 
   [[ -f "${file_or_directory}" ]]
 }
@@ -417,7 +417,7 @@ is_file() {
 ## @retval     `false`  Otherwise.
 ##
 is_directory() {
-  local -r file_or_directory="$1"
+  local +x -r file_or_directory="$1"
 
   [[ -d "${file_or_directory}" ]]
 }
@@ -431,7 +431,7 @@ is_directory() {
 ## @retval     `false`  Otherwise.
 ##
 is_not_empty() {
-  local -r string="$1"
+  local +x -r string="$1"
 
   [[ -n "${string}" ]]
 }
@@ -449,9 +449,9 @@ is_not_empty() {
 ## @retval     `false`  Otherwise.
 ##
 matches_array_item_regex() {
-  local -r item="$1"
-  local -r array_name="$2[@]"
-  local current_item_regex
+  local +x -r item="$1"
+  local +x -r array_name="$2[@]"
+  local +x current_item_regex
 
   for current_item_regex in "${!array_name}"; do
     if [[ "${item}" =~ ${current_item_regex} ]]; then
@@ -470,8 +470,8 @@ matches_array_item_regex() {
 ## @return     The maximum of the two integer numbers.
 ##
 max() {
-  local -r -i m="$1"
-  local -r -i n="$2"
+  local +x -r -i m="$1"
+  local +x -r -i n="$2"
 
   echo "$((m > n ? m : n))"
 
@@ -489,7 +489,7 @@ max() {
 ##             file or directory.
 ##
 get_absolute_logical_path() {
-  local -r file_or_directory="$1"
+  local +x -r file_or_directory="$1"
 
   is_not_empty "${file_or_directory}" || return 1
   is_existing "${file_or_directory}" || return 1
@@ -524,9 +524,9 @@ get_absolute_logical_path() {
 ## @return     The item starting with the string.
 ##
 get_item_starting_with_string() {
-  local -r string="$1"
-  local -r array_name="$2[@]"
-  local current_item
+  local +x -r string="$1"
+  local +x -r array_name="$2[@]"
+  local +x current_item
 
   for current_item in "${!array_name}"; do
     if [[ "${current_item}" == "${string}"* ]]; then
@@ -550,9 +550,9 @@ get_item_starting_with_string() {
 ## @return     The trimmed field content.
 ##
 get_trimmed_field_content() {
-  local -r string="$1"
-  local -r -i field_number="$2"
-  local field
+  local +x -r string="$1"
+  local +x -r -i field_number="$2"
+  local +x field
 
   field="$(cut -d# -f"${field_number}" <<<"${string}")" || return 1
 
@@ -570,9 +570,9 @@ get_trimmed_field_content() {
 ## @retval     `false`  Otherwise.
 ##
 get_user_consent() {
-  local -r prompt="$1"
-  local input
-  local -r yes_regex='^[yY].*$'
+  local +x -r prompt="$1"
+  local +x input
+  local +x -r yes_regex='^[yY].*$'
 
   echo_n "${prompt}"
   IFS= read -r input
@@ -589,8 +589,8 @@ get_user_consent() {
 ## @return     The value of the specified property list entry.
 ##
 get_plist_value() {
-  local -r entry="$1"
-  local -r plist_file="$2"
+  local +x -r entry="$1"
+  local +x -r plist_file="$2"
 
   is_not_empty "${entry}" || return 1
   is_not_empty "${plist_file}" || return 1
@@ -606,9 +606,9 @@ get_plist_value() {
 ## @param      $3    A property list file.
 ##
 set_plist_value() {
-  local -r entry="$1"
-  local -r value="$2"
-  local -r plist_file="$3"
+  local +x -r entry="$1"
+  local +x -r value="$2"
+  local +x -r plist_file="$3"
 
   is_not_empty "${entry}" || return 1
   is_not_empty "${value}" || return 1
@@ -626,8 +626,8 @@ set_plist_value() {
 ## @return     The output of PlistBuddy.
 ##
 execute_plist_buddy_command() {
-  local -r plist_command="$1"
-  local -r plist_file="$2"
+  local +x -r plist_command="$1"
+  local +x -r plist_file="$2"
 
   is_not_empty "${plist_command}" || return 1
   is_not_empty "${plist_file}" || return 1
@@ -644,7 +644,7 @@ execute_plist_buddy_command() {
 ## @return     The trimmed string.
 ##
 trim() {
-  local string="$1"
+  local +x string="$1"
 
   # Remove leading whitespace
   string="${string#"${string%%[![:space:]]*}"}"
@@ -680,7 +680,7 @@ set_shell_options_for_exit() {
 ## @brief      Sets the traps for 'EXIT' and signal handling.
 ##
 set_traps() {
-  local -i signal_number
+  local +x -i signal_number
 
   trap "exit_handler" EXIT
 
@@ -737,9 +737,9 @@ exit_handler() {
 ##
 # shellcheck disable=SC2317
 signal_handler() {
-  local -r -i signal_number="$1"
-  local -r -i min_signal_number=1
-  local -r -i max_signal_number=31
+  local +x -r -i signal_number="$1"
+  local +x -r -i min_signal_number=1
+  local +x -r -i max_signal_number=31
 
   set_shell_options_for_exit
   trap - EXIT
@@ -779,7 +779,7 @@ cleanup() {
 ##
 # shellcheck disable=SC2317
 detach_for_cleanup() {
-  local -r variable_name="$1"
+  local +x -r variable_name="$1"
 
   if is_not_empty "${!variable_name-}" && is_existing "${!variable_name}"; then
     hdiutil detach "${!variable_name}" -force >/dev/null && unset "${variable_name}"
@@ -794,8 +794,8 @@ detach_for_cleanup() {
 ## @param      $2    Optional error message text(s).
 ##
 exit_with_status() {
-  local -r -i exit_status="$1"
-  local -a error_messages
+  local +x -r -i exit_status="$1"
+  local +x -a error_messages
 
   shift
   error_messages=("$@")
@@ -815,8 +815,8 @@ exit_with_status() {
 ##                   (e.g. 'SIGINT').
 ##
 kill_process_group_with_signal_name() {
-  local -r signal_name="$1"
-  local pgid
+  local +x -r signal_name="$1"
+  local +x pgid
 
   is_not_empty "${signal_name}" || return 1
 
@@ -879,11 +879,11 @@ print_error_usage() {
 ##             output to the user (e.g. 'Install macOS Sierra.app').
 ##
 create_example_installer_application_name() {
-  local -r -i number_of_elements="${#SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[@]}"
-  local item="${SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[${number_of_elements} - 1]}"
-  local example_installer_application_name
-  local -i i
-  local installer_application_name
+  local +x -r -i number_of_elements="${#SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[@]}"
+  local +x item="${SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS[${number_of_elements} - 1]}"
+  local +x example_installer_application_name
+  local +x -i i
+  local +x installer_application_name
 
   example_installer_application_name="$(get_trimmed_field_content "${item}" 1).app"
 
@@ -916,7 +916,7 @@ create_example_installer_application_name() {
 ## @retval     `false`  Otherwise.
 ##
 is_option_including_option_parameter() {
-  local -r argument="$1"
+  local +x -r argument="$1"
 
   is_long_option_including_option_parameter "${argument}" || is_short_option_including_option_parameter "${argument}"
 }
@@ -933,7 +933,7 @@ is_option_including_option_parameter() {
 ## @retval     `false`  Otherwise.
 ##
 is_long_option_including_option_parameter() {
-  local -r argument="$1"
+  local +x -r argument="$1"
 
   [[ "${argument}" == --*=* ]]
 }
@@ -950,7 +950,7 @@ is_long_option_including_option_parameter() {
 ## @retval     `false`  Otherwise.
 ##
 is_short_option_including_option_parameter() {
-  local -r argument="$1"
+  local +x -r argument="$1"
 
   [[ "${argument}" == -[^-]?* ]]
 }
@@ -965,7 +965,7 @@ is_short_option_including_option_parameter() {
 ## @retval     `false`  Otherwise.
 ##
 is_long_option() {
-  local -r argument="$1"
+  local +x -r argument="$1"
 
   [[ "${argument}" == --?* ]]
 }
@@ -983,8 +983,8 @@ is_long_option() {
 ## @retval     `false`  Otherwise.
 ##
 is_valid_long_option() {
-  local -r argument="$1"
-  local -r long_option="$2"
+  local +x -r argument="$1"
+  local +x -r long_option="$2"
 
   is_long_option "${argument}" || return 1
 
@@ -1003,7 +1003,7 @@ is_valid_long_option() {
 ## @retval     `false`  Otherwise.
 ##
 is_short_options_combination() {
-  local -r argument="$1"
+  local +x -r argument="$1"
 
   [[ "${argument}" == -[^-]?* ]]
 }
@@ -1016,7 +1016,7 @@ is_short_options_combination() {
 ##                   (including leading '-' or '--').
 ##
 exit_invalid_option() {
-  local -r option="$1"
+  local +x -r option="$1"
 
   if is_long_option "${option}"; then
     print_error "${SCRIPT_NAME}: unrecognized option \`${option}'"
@@ -1036,7 +1036,7 @@ exit_invalid_option() {
 ##                   (including leading '-' or '--').
 ##
 exit_missing_option_parameter_for_option() {
-  local -r option="$1"
+  local +x -r option="$1"
 
   if is_long_option "${option}"; then
     print_error "${SCRIPT_NAME}: option \`${option}' requires an argument"
@@ -1057,7 +1057,7 @@ exit_missing_option_parameter_for_option() {
 ##                   (including leading '--').
 ##
 exit_no_option_parameter_allowed_for_long_option() {
-  local -r long_option="$1"
+  local +x -r long_option="$1"
 
   print_error "${SCRIPT_NAME}: option \`${long_option}' doesn't allow an argument"
 
@@ -1073,7 +1073,7 @@ exit_no_option_parameter_allowed_for_long_option() {
 ##                   (including leading '--').
 ##
 exit_ambiguous_long_option() {
-  local -r long_option="$1"
+  local +x -r long_option="$1"
 
   print_error "${SCRIPT_NAME}: option \`${long_option}' is ambiguous"
 
@@ -1095,7 +1095,7 @@ exit_ambiguous_long_option() {
 ## @retval     `false`  Otherwise.
 ##
 is_unsupported_macos_version_string() {
-  local -r macos_version_string="$1"
+  local +x -r macos_version_string="$1"
 
   matches_array_item_regex "${macos_version_string}" "UNSUPPORTED_MACOS_VERSION_STRINGS_REGEX"
 }
@@ -1110,7 +1110,7 @@ is_unsupported_macos_version_string() {
 ## @retval     `false`  Otherwise.
 ##
 is_supported_macos_version_string() {
-  local -r macos_version_string="$1"
+  local +x -r macos_version_string="$1"
 
   matches_array_item_regex "${macos_version_string}" "SUPPORTED_MACOS_VERSION_STRINGS_REGEX"
 }
@@ -1124,7 +1124,7 @@ is_supported_macos_version_string() {
 ## @retval     `false`  Otherwise.
 ##
 is_valid_iso_directory_path() {
-  local -r iso_directory_path="$1"
+  local +x -r iso_directory_path="$1"
 
   is_not_empty "${iso_directory_path}" || return 1
 
@@ -1141,20 +1141,20 @@ is_valid_iso_directory_path() {
 ## @retval     `false`  Otherwise.
 ##
 is_valid_installer_application_path() {
-  local -r installer_application_path="$1"
-  local installer_application_display_name=""
-  local -i installer_application_type=0
+  local +x -r installer_application_path="$1"
+  local +x installer_application_display_name=""
+  local +x -i installer_application_type=0
 
-  local installer_application_short_version_string
-  local valid_installer_application_short_version_string_regex='^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
+  local +x installer_application_short_version_string
+  local +x valid_installer_application_short_version_string_regex='^[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+$'
 
-  local installer_application_identifier
-  local valid_installer_application_identifier_regex='^com\.apple\.InstallAssistant\.[a-zA-Z0-9.-]+$'
+  local +x installer_application_identifier
+  local +x valid_installer_application_identifier_regex='^com\.apple\.InstallAssistant\.[a-zA-Z0-9.-]+$'
 
-  local installer_application_minimum_system_version
-  local valid_installer_application_minimum_system_version='^[[:digit:]]+\.[[:digit:]]+\.?[[:digit:]]*$'
+  local +x installer_application_minimum_system_version
+  local +x valid_installer_application_minimum_system_version='^[[:digit:]]+\.[[:digit:]]+\.?[[:digit:]]*$'
 
-  local system_image_url
+  local +x system_image_url
 
   is_not_empty "${installer_application_path}" || return 1
   is_directory "${installer_application_path}" || return 1
@@ -1304,9 +1304,9 @@ is_valid_installer_application_path() {
 ## @retval     `false`  Otherwise.
 ##
 is_defective_macos_sierra_installer_application() {
-  local -r installer_application_path="$1"
-  local -r installer_application_display_name="$2"
-  local installer_application_short_version_string
+  local +x -r installer_application_path="$1"
+  local +x -r installer_application_display_name="$2"
+  local +x installer_application_short_version_string
 
   [[ "${installer_application_display_name}" == "Install macOS Sierra" ]] || return 1
   installer_application_short_version_string="$(get_installer_application_short_version_string "${installer_application_path}")" || return 1
@@ -1325,8 +1325,8 @@ is_defective_macos_sierra_installer_application() {
 ## @retval     `false`  Otherwise.
 ##
 is_mach_o_arm64_executable() {
-  local -r file="$1"
-  local -r arm64_regex='[[:<:]]arm64[[:>:]]'
+  local +x -r file="$1"
+  local +x -r arm64_regex='[[:<:]]arm64[[:>:]]'
 
   # Check whether the list of architectures contains 'arm64' at word
   # boundaries.
@@ -1345,7 +1345,7 @@ is_mach_o_arm64_executable() {
 ## @retval     `false`  Otherwise.
 ##
 is_createinstallmedia_required() {
-  local -r installer_application_type="$1"
+  local +x -r installer_application_type="$1"
 
   case "${installer_application_type}" in
     0 | 1 | 2)
@@ -1385,7 +1385,7 @@ is_modification_of_installer_application_required() {
 ## @retval     `false`  Otherwise.
 ##
 is_supported_installer_application_display_name() {
-  local -r installer_application_display_name="$1"
+  local +x -r installer_application_display_name="$1"
 
   get_item_starting_with_string "${installer_application_display_name}" "SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS" >/dev/null
 }
@@ -1398,7 +1398,7 @@ is_supported_installer_application_display_name() {
 ## @return     The installer application display name.
 ##
 get_installer_application_display_name() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   is_not_empty "${installer_application_path}" || return 1
 
@@ -1439,8 +1439,8 @@ get_installer_application_display_name() {
 ## @return     The type of the installer application.
 ##
 get_installer_application_type() {
-  local -r installer_application_path="$1"
-  local -i installer_application_type=0
+  local +x -r installer_application_path="$1"
+  local +x -i installer_application_type=0
 
   is_not_empty "${installer_application_path}" || return 1
 
@@ -1477,9 +1477,9 @@ get_installer_application_type() {
 ## @return     The minimum macOS version string.
 ##
 get_minimum_macos_version_string() {
-  local -r installer_application_path="$1"
-  local -r installer_application_display_name="$2"
-  local minimum_macos_version_string
+  local +x -r installer_application_path="$1"
+  local +x -r installer_application_display_name="$2"
+  local +x minimum_macos_version_string
 
   case "${installer_application_display_name}" in
 
@@ -1540,8 +1540,8 @@ get_minimum_macos_version_string() {
 ## @return     The total number of non empty bytes.
 ##
 get_disk_image_total_non_empty_bytes() {
-  local -r disk_image="$1"
-  local plist_file
+  local +x -r disk_image="$1"
+  local +x plist_file
 
   is_not_empty "${disk_image}" || return 1
   is_not_empty "${g_tmp_directory-}" || return 1
@@ -1563,8 +1563,8 @@ get_disk_image_total_non_empty_bytes() {
 ## @return     The offset in megabytes.
 ##
 get_offset_for_tmp_directory() {
-  local -r installer_application_display_name="$1"
-  local item
+  local +x -r installer_application_display_name="$1"
+  local +x item
 
   item="$(get_item_starting_with_string "${installer_application_display_name}" "SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS")" || return 1
   get_trimmed_field_content "${item}" 2
@@ -1579,8 +1579,8 @@ get_offset_for_tmp_directory() {
 ## @return     The offset in megabytes.
 ##
 get_offset_for_iso_directory_path() {
-  local -r installer_application_display_name="$1"
-  local item
+  local +x -r installer_application_display_name="$1"
+  local +x item
 
   item="$(get_item_starting_with_string "${installer_application_display_name}" "SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS")" || return 1
   get_trimmed_field_content "${item}" 3
@@ -1595,7 +1595,7 @@ get_offset_for_iso_directory_path() {
 ## @return     The installer application 'minimum system version'.
 ##
 get_installer_application_minimum_system_version() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   is_not_empty "${installer_application_path}" || return 1
 
@@ -1611,7 +1611,7 @@ get_installer_application_minimum_system_version() {
 ## @return     The installer application 'short version string'.
 ##
 get_installer_application_short_version_string() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   is_not_empty "${installer_application_path}" || return 1
 
@@ -1626,8 +1626,8 @@ get_installer_application_short_version_string() {
 ## @param      $2    The new value for the 'short version string'.
 ##
 set_installer_application_short_version_string() {
-  local -r installer_application_path="$1"
-  local -r value="$2"
+  local +x -r installer_application_path="$1"
+  local +x -r value="$2"
 
   is_not_empty "${installer_application_path}" || return 1
   is_not_empty "${value}" || return 1
@@ -1643,7 +1643,7 @@ set_installer_application_short_version_string() {
 ## @return     The installer application 'identifier'.
 ##
 get_installer_application_identifier() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   is_not_empty "${installer_application_path}" || return 1
 
@@ -1659,7 +1659,7 @@ get_installer_application_identifier() {
 ## @return     The URL of the system image.
 ##
 get_system_image_url() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   is_not_empty "${installer_application_path}" || return 1
 
@@ -1674,11 +1674,11 @@ get_system_image_url() {
 ## @param      $1    A macOS version as string (e.g. '10.12.2').
 ##
 create_macos_version_for_compare() {
-  local -r macos_version_string="$1"
-  local -i -a macos_version
-  local -i macos_major_version
-  local -i macos_minor_version
-  local -i macos_patch_version
+  local +x -r macos_version_string="$1"
+  local +x -i -a macos_version
+  local +x -i macos_major_version
+  local +x -i macos_minor_version
+  local +x -i macos_patch_version
 
   IFS='.' read -r -a macos_version < <(echo "${macos_version_string}") || return 1
   macos_major_version="${macos_version[0]:-0}"
@@ -1698,11 +1698,11 @@ create_macos_version_for_compare() {
 ##             'macOS Sierra 10.12.2').
 ##
 create_macos_name_and_version() {
-  local -r macos_version_string="$1"
-  local current_item
-  local current_item_regex
-  local current_item_name
-  local macos_name="macOS"
+  local +x -r macos_version_string="$1"
+  local +x current_item
+  local +x current_item_regex
+  local +x current_item_name
+  local +x macos_name="macOS"
 
   for current_item in "${KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX[@]}"; do
 
@@ -1732,12 +1732,12 @@ create_macos_name_and_version() {
 ##                   media should be created.
 ##
 create_install_media() {
-  local -r installer_application_path="$1"
-  local -r install_disk_volname="$2"
-  local applicationpath_option_name=""
-  local applicationpath_option_parameter=""
-  local unused
-  local -i exit_status
+  local +x -r installer_application_path="$1"
+  local +x -r install_disk_volname="$2"
+  local +x applicationpath_option_name=""
+  local +x applicationpath_option_parameter=""
+  local +x unused
+  local +x -i exit_status
 
   is_not_empty "${installer_application_path}" || return 1
   is_not_empty "${install_disk_volname}" || return 1
@@ -1769,10 +1769,10 @@ create_install_media() {
 ##             into this script.
 ##
 parse_create_install_media() {
-  local char
-  local text_buffer=""
-  local -r separator=$'\v'
-  local -r -a trigger_text_array=(
+  local +x char
+  local +x text_buffer=""
+  local +x -r separator=$'\v'
+  local +x -r -a trigger_text_array=(
     'Erasing Disk: 0%...'
     'Erasing disk: 0%...'
     ' 10%...'
@@ -1793,45 +1793,45 @@ parse_create_install_media() {
     'Done.'
     'Install media now available at '
   )
-  local -r trigger_text="$(
+  local +x -r trigger_text="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_text_array[@]}"
   )"
-  local -r -a trigger_line_mute_array=(
+  local +x -r -a trigger_line_mute_array=(
     'Copy complete.'
     'Done.'
     'Install media now available at '
   )
-  local -r trigger_line_mute="$(
+  local +x -r trigger_line_mute="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_line_mute_array[@]}"
   )"
-  local -r trigger_newline_mute_array=(
+  local +x -r trigger_newline_mute_array=(
     '100%...'
     ' 100%'
     'Copying installer files to disk...'
   )
-  local -r trigger_copying_line_array=(
+  local +x -r trigger_copying_line_array=(
     'Copying installer files to disk...'
     'Copying to disk: 0%...'
   )
-  local -r trigger_copying_line="$(
+  local +x -r trigger_copying_line="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_copying_line_array[@]}"
   )"
-  local -r trigger_newline_mute="$(
+  local +x -r trigger_newline_mute="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_newline_mute_array[@]}"
   )"
-  local -r trigger_making_line_array=(
+  local +x -r trigger_making_line_array=(
     'Making disk bootable...'
   )
-  local -r trigger_making_line="$(
+  local +x -r trigger_making_line="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_making_line_array[@]}"
   )"
-  local is_line_mute="false"
-  local is_newline_mute="false"
+  local +x is_line_mute="false"
+  local +x is_newline_mute="false"
 
   while IFS= read -r -n1 -d "" char; do
     if [[ ("${is_line_mute}" == "true") && ("${char}" != $'\n') ]]; then
@@ -1900,7 +1900,7 @@ parse_create_install_media() {
 ## @retval     `false`  Otherwise.
 ##
 script_createinstallmedia_canceled_by_sigint() {
-  local -r -i exit_status="$1"
+  local +x -r -i exit_status="$1"
 
   [[ "${exit_status}" -eq 2 ]]
 }
@@ -1917,7 +1917,7 @@ script_createinstallmedia_canceled_by_sigint() {
 ## @retval     `false`  Otherwise.
 ##
 script_createinstallmedia_canceled_by_sigquit() {
-  local -r -i exit_status="$1"
+  local +x -r -i exit_status="$1"
 
   [[ "${exit_status}" -eq 3 ]]
 }
@@ -1930,11 +1930,11 @@ script_createinstallmedia_canceled_by_sigquit() {
 ## @param      $1    The path to an installer application.
 ##
 replace_code_signatures() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   find "${installer_application_path}" -type f -print0 | while IFS= read -r -d "" file; do
-    local file
-    local -i exit_status
+    local +x file
+    local +x -i exit_status
 
     # Check if file has a code signature
     codesign -d "${file}" >/dev/null 2>&1
@@ -1955,12 +1955,12 @@ replace_code_signatures() {
 ## @param      $3    The default volume name for the ISO image.
 ##
 create_iso_image() {
-  local -r iso_source_image="$1"
-  local -r iso_destination_image="$2"
-  local -r default_volume_name="$3"
-  local -r typescript_file="${g_tmp_directory}/typescript_hdiutil_makehybrid"
-  local unused
-  local -i exit_status
+  local +x -r iso_source_image="$1"
+  local +x -r iso_destination_image="$2"
+  local +x -r default_volume_name="$3"
+  local +x -r typescript_file="${g_tmp_directory}/typescript_hdiutil_makehybrid"
+  local +x unused
+  local +x -i exit_status
 
   is_not_empty "${iso_source_image}" || return 1
   is_not_empty "${iso_destination_image}" || return 1
@@ -1986,54 +1986,54 @@ create_iso_image() {
 ##             into this script.
 ##
 parse_create_iso_image() {
-  local char
-  local char_history=""
-  local last_four_chars
-  local text_buffer=""
-  local text_buffer_with_dots
-  local -r separator=$'\v'
-  local -r -a trigger_text_array=(
+  local +x char
+  local +x char_history=""
+  local +x last_four_chars
+  local +x text_buffer=""
+  local +x text_buffer_with_dots
+  local +x -r separator=$'\v'
+  local +x -r -a trigger_text_array=(
     'Creating hybrid image...'
     'hdiutil: '
     'canceling...'
   )
-  local -r trigger_text="$(
+  local +x -r trigger_text="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_text_array[@]}"
   )"
-  local -r -a trigger_line_mute_array=(
+  local +x -r -a trigger_line_mute_array=(
     'Creating hybrid image...'
     'hdiutil: '
   )
-  local -r trigger_line_mute="$(
+  local +x -r trigger_line_mute="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_line_mute_array[@]}"
   )"
-  local -r -a trigger_progress_line_array=(
+  local +x -r -a trigger_progress_line_array=(
     'Creating hybrid image...'
   )
-  local -r trigger_progress_line="$(
+  local +x -r trigger_progress_line="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_progress_line_array[@]}"
   )"
-  local -r -a trigger_mute_array=(
+  local +x -r -a trigger_mute_array=(
     'canceling...'
   )
-  local -r trigger_mute="$(
+  local +x -r trigger_mute="$(
     echo_n "${separator}"
     printf "%s${separator}" "${trigger_mute_array[@]}"
   )"
-  local is_line_mute="false"
-  local is_mute="false"
-  local is_progress_line="false"
-  local -r shell_columns="$(tput cols 2>/dev/tty)"
-  local -r -i dot_count_max="$((shell_columns - 2))"
-  local -i dot_count=0
-  local -i dot_increment
-  local -i percent
-  local -i percent_step
-  local -i -r -a percent_steps=(20 40 60 80 100)
-  local -i last_percent=0
+  local +x is_line_mute="false"
+  local +x is_mute="false"
+  local +x is_progress_line="false"
+  local +x -r shell_columns="$(tput cols 2>/dev/tty)"
+  local +x -r -i dot_count_max="$((shell_columns - 2))"
+  local +x -i dot_count=0
+  local +x -i dot_increment
+  local +x -i percent
+  local +x -i percent_step
+  local +x -i -r -a percent_steps=(20 40 60 80 100)
+  local +x -i last_percent=0
 
   while IFS= read -r -n1 -d "" char; do
     if [[ (("${is_line_mute}" == "true") && ("${char}" != $'\n')) || ("${is_mute}" == "true") ]]; then
@@ -2132,7 +2132,7 @@ parse_create_iso_image() {
 ## @retval     `false`  Otherwise.
 ##
 script_hdiutil_makehybrid_canceled_by_sigint() {
-  local -r typescript_file="$1"
+  local +x -r typescript_file="$1"
 
   is_not_empty "${typescript_file}" || return 1
 
@@ -2151,7 +2151,7 @@ script_hdiutil_makehybrid_canceled_by_sigint() {
 ## @retval     `false`  Otherwise.
 ##
 script_hdiutil_makehybrid_canceled_by_sigquit() {
-  local -r -i exit_status="$1"
+  local +x -r -i exit_status="$1"
 
   [[ "${exit_status}" -eq 3 ]]
 }
@@ -2173,18 +2173,18 @@ script_hdiutil_makehybrid_canceled_by_sigquit() {
 ## @return     A string containing the human-readable byte size.
 ##
 create_human_readable_byte_size() {
-  local -i bytes="$1"
-  local -r -i number_to_add_for_rounding="$2"
-  local -r -i round_up_to_multiple_of_value="$3"
-  local -r -a units=("Bytes" "KB" "MB" "GB" "TB" "PB" "EB")
-  local -r -i max_power_of_thousand="$((${#units[@]} - 1))"
-  local -i number_of_digits
-  local -i power_of_thousand
-  local -i first_three_digits
-  local -i truncated_digits
-  local -i integer_part_number_of_digits
-  local -i integer_part
-  local fractional_part
+  local +x -i bytes="$1"
+  local +x -r -i number_to_add_for_rounding="$2"
+  local +x -r -i round_up_to_multiple_of_value="$3"
+  local +x -r -a units=("Bytes" "KB" "MB" "GB" "TB" "PB" "EB")
+  local +x -r -i max_power_of_thousand="$((${#units[@]} - 1))"
+  local +x -i number_of_digits
+  local +x -i power_of_thousand
+  local +x -i first_three_digits
+  local +x -i truncated_digits
+  local +x -i integer_part_number_of_digits
+  local +x -i integer_part
+  local +x fractional_part
 
   # Use absolute value of bytes for further calculations
   ((bytes = ${bytes//-/}))
@@ -2230,10 +2230,10 @@ create_human_readable_byte_size() {
 ## @return     The decimal number.
 ##
 create_decimal_number() {
-  local -r -i integer_part="$1"
-  local fractional_part="$2"
-  local localized_decimal_separator
-  local decimal_number="${integer_part}"
+  local +x -r -i integer_part="$1"
+  local +x fractional_part="$2"
+  local +x localized_decimal_separator
+  local +x decimal_number="${integer_part}"
 
   # Retrieve the localized decimal separator by printing '0.0' and
   # removing the '0's from the resulting string.
@@ -2262,10 +2262,10 @@ create_decimal_number() {
 ## @retval     `false`  Otherwise.
 ##
 are_one_same_device() {
-  local -r file_or_directory_1="$1"
-  local -r file_or_directory_2="$2"
-  local device_id_1
-  local device_id_2
+  local +x -r file_or_directory_1="$1"
+  local +x -r file_or_directory_2="$2"
+  local +x device_id_1
+  local +x device_id_2
 
   # The 'stat' command must be called with the '-L' option so that the
   # information reported by 'stat' refers to the target of the file,
@@ -2287,7 +2287,7 @@ are_one_same_device() {
 ## @retval     `false`  Otherwise.
 ##
 has_applicationpath_option() {
-  local -r installer_application_path="$1"
+  local +x -r installer_application_path="$1"
 
   "${installer_application_path}/Contents/Resources/createinstallmedia" 2>&1 | grep --regexp="--applicationpath" >/dev/null
 }
@@ -2303,10 +2303,10 @@ has_applicationpath_option() {
 ## @param      $3    The missing disk space in bytes.
 ##
 exit_with_missing_disk_space() {
-  local -r volume_name="$1"
-  local -r human_readable_for_what="$2"
-  local -r -i missing_disk_space="$3"
-  local human_readable_missing_disk_space
+  local +x -r volume_name="$1"
+  local +x -r human_readable_for_what="$2"
+  local +x -r -i missing_disk_space="$3"
+  local +x human_readable_missing_disk_space
 
   human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_disk_space}" "1" "100000")"
 
@@ -2333,11 +2333,11 @@ main() {
   # Check operating system requirements
   # ------------------------------------------------------------------
 
-  local os_name
+  local +x os_name
 
-  local macos_version_string
-  local -i macos_version_for_compare
-  local macos_name_and_version
+  local +x macos_version_string
+  local +x -i macos_version_for_compare
+  local +x macos_name_and_version
 
   os_name="$(get_os_name)" || exit_with_status 251 "Couldn't get operating system name."
   is_macos "${os_name}" || exit_with_status 250 "This tool must be run on macOS."
@@ -2359,12 +2359,12 @@ main() {
   # Handle command line arguments
   # ------------------------------------------------------------------
 
-  local option_applicationpath
-  local option_isodirectory
-  local option_nointeraction="false"
+  local +x option_applicationpath
+  local +x option_isodirectory
+  local +x option_nointeraction="false"
 
-  local long_option
-  local option_parameter
+  local +x long_option
+  local +x option_parameter
 
   # This script requires at least four arguments: Two options with one
   # option parameter each. However, this does not take into account
@@ -2499,14 +2499,14 @@ main() {
   # Initialization
   # ------------------------------------------------------------------
 
-  local installer_application_path
-  local original_installer_application_path
-  local installer_application_basename
-  local iso_directory_path
-  local installer_application_display_name
-  local -i installer_application_type
-  local iso_destination_image
-  local random_string
+  local +x installer_application_path
+  local +x original_installer_application_path
+  local +x installer_application_basename
+  local +x iso_directory_path
+  local +x installer_application_display_name
+  local +x -i installer_application_type
+  local +x iso_destination_image
+  local +x random_string
 
   installer_application_path="$(get_absolute_logical_path "${option_applicationpath}")" || exit_with_status 244 "Couldn't get absolute path for ${option_applicationpath}."
   original_installer_application_path="${installer_application_path}"
@@ -2524,8 +2524,8 @@ main() {
   # Check installer application requirements
   # ------------------------------------------------------------------
 
-  local installer_minimum_macos_version_string
-  local -i minimum_macos_version_for_compare
+  local +x installer_minimum_macos_version_string
+  local +x -i minimum_macos_version_for_compare
 
   if ! is_supported_installer_application_display_name "${installer_application_display_name}"; then
     print_warning "${installer_application_display_name} has not been tested with this tool."
@@ -2556,7 +2556,7 @@ main() {
   # Perform required user interactions
   # ------------------------------------------------------------------
 
-  local type_of_existing_destination
+  local +x type_of_existing_destination
 
   if is_existing "${iso_destination_image}"; then
     if is_file "${iso_destination_image}"; then
@@ -2582,20 +2582,20 @@ main() {
   # Check available disk space
   # ------------------------------------------------------------------
 
-  local -i available_in_tmp_directory
-  local -i available_in_iso_directory
+  local +x -i available_in_tmp_directory
+  local +x -i available_in_iso_directory
 
-  local -i required_for_modified_installer_application
-  local -i required_for_iso_image
+  local +x -i required_for_modified_installer_application
+  local +x -i required_for_iso_image
 
-  local -i required_in_tmp_directory
-  local -i required_in_iso_directory
+  local +x -i required_in_tmp_directory
+  local +x -i required_in_iso_directory
 
-  local -i offset_for_tmp_directory
-  local -i offset_for_iso_image
+  local +x -i offset_for_tmp_directory
+  local +x -i offset_for_iso_image
 
-  local -i missing_in_tmp_directory
-  local -i missing_in_iso_directory
+  local +x -i missing_in_tmp_directory
+  local +x -i missing_in_iso_directory
 
   ((available_in_tmp_directory = $(get_available_disk_space "${g_tmp_directory}")))
   ((available_in_iso_directory = $(get_available_disk_space "${iso_directory_path}")))
@@ -2688,7 +2688,7 @@ main() {
   # Modify installer application (if required)
   # ------------------------------------------------------------------
 
-  local modified_installer_application_path
+  local +x modified_installer_application_path
 
   if is_modification_of_installer_application_required; then
     modified_installer_application_path="${g_tmp_directory}/InstallerApplication/${installer_application_basename}"
@@ -2714,13 +2714,13 @@ main() {
   # Create source image for ISO image
   # ------------------------------------------------------------------
 
-  local iso_source_image
-  local install_esd_image
-  local base_system_image
-  local install_disk_image
-  local install_disk_volname
-  local core_services_directory
-  local result
+  local +x iso_source_image
+  local +x install_esd_image
+  local +x base_system_image
+  local +x install_disk_image
+  local +x install_disk_volname
+  local +x core_services_directory
+  local +x result
 
   case "${installer_application_type}" in
 
