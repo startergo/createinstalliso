@@ -33,6 +33,7 @@ readonly ROOT_UID=0
 # or later. However, on Mac OS X 10.5 Leopard, PlistBuddy does not
 # handle large integer values correctly. Therefore, this script requires
 # Mac OS X 10.6 Snow Leopard or later.
+# shellcheck disable=SC2034
 readonly -a UNSUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
   '^10\.0(\.[[:digit:]]+)?$' # Mac OS X Cheetah      10.0
   '^10\.1(\.[[:digit:]]+)?$' # Mac OS X Puma         10.1
@@ -43,6 +44,7 @@ readonly -a UNSUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
 )
 
 # List of all supported macOS versions.
+# shellcheck disable=SC2034
 readonly -a SUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
   '^10\.6(\.[[:digit:]]+)?$'            # Mac OS X Snow Leopard 10.6
   '^10\.7(\.[[:digit:]]+)?$'            # Mac OS X Lion         10.7
@@ -669,6 +671,7 @@ set_shell_options() {
 ##
 ## @brief      Sets the shell options for exit.
 ##
+# shellcheck disable=SC2317
 set_shell_options_for_exit() {
   set +o errexit
 }
@@ -719,6 +722,7 @@ set_global_variables() {
 ##
 ## @brief      Handles the 'EXIT' pseudo-signal.
 ##
+# shellcheck disable=SC2317
 exit_handler() {
   set_shell_options_for_exit
   trap - EXIT
@@ -731,6 +735,7 @@ exit_handler() {
 ## @param      $1    The signal number to be handled (e.g. '2' for
 ##                   SIGINT).
 ##
+# shellcheck disable=SC2317
 signal_handler() {
   local -r -i signal_number="$1"
   local -r -i min_signal_number=1
@@ -751,6 +756,7 @@ signal_handler() {
 ##
 ## @brief      Performs the required cleanup of allocated ressources.
 ##
+# shellcheck disable=SC2317
 cleanup() {
   if is_not_empty "${g_tmp_directory-}" && is_existing "${g_tmp_directory}"; then
     detach_for_cleanup "g_install_esd_mountpoint"
@@ -771,6 +777,7 @@ cleanup() {
 ## @param      $1    A string containing the name of the variable that
 ##                   stores the device name to be detached.
 ##
+# shellcheck disable=SC2317
 detach_for_cleanup() {
   local -r variable_name="$1"
 
@@ -1787,7 +1794,7 @@ parse_create_install_media() {
     'Install media now available at '
   )
   local -r trigger_text="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_text_array[@]}"
   )"
   local -r -a trigger_line_mute_array=(
@@ -1796,7 +1803,7 @@ parse_create_install_media() {
     'Install media now available at '
   )
   local -r trigger_line_mute="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_line_mute_array[@]}"
   )"
   local -r trigger_newline_mute_array=(
@@ -1809,18 +1816,18 @@ parse_create_install_media() {
     'Copying to disk: 0%...'
   )
   local -r trigger_copying_line="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_copying_line_array[@]}"
   )"
   local -r trigger_newline_mute="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_newline_mute_array[@]}"
   )"
   local -r trigger_making_line_array=(
     'Making disk bootable...'
   )
   local -r trigger_making_line="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_making_line_array[@]}"
   )"
   local is_line_mute="false"
@@ -1924,10 +1931,11 @@ script_createinstallmedia_canceled_by_sigquit() {
 ##
 replace_code_signatures() {
   local -r installer_application_path="$1"
-  local file
-  local -i exit_status
 
   find "${installer_application_path}" -type f -print0 | while IFS= read -r -d "" file; do
+    local file
+    local -i exit_status
+
     # Check if file has a code signature
     codesign -d "${file}" >/dev/null 2>&1
     exit_status="$?"
@@ -1990,7 +1998,7 @@ parse_create_iso_image() {
     'canceling...'
   )
   local -r trigger_text="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_text_array[@]}"
   )"
   local -r -a trigger_line_mute_array=(
@@ -1998,21 +2006,21 @@ parse_create_iso_image() {
     'hdiutil: '
   )
   local -r trigger_line_mute="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_line_mute_array[@]}"
   )"
   local -r -a trigger_progress_line_array=(
     'Creating hybrid image...'
   )
   local -r trigger_progress_line="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_progress_line_array[@]}"
   )"
   local -r -a trigger_mute_array=(
     'canceling...'
   )
   local -r trigger_mute="$(
-    printf "${separator}"
+    echo_n "${separator}"
     printf "%s${separator}" "${trigger_mute_array[@]}"
   )"
   local is_line_mute="false"
@@ -2351,8 +2359,8 @@ main() {
   # Handle command line arguments
   # ------------------------------------------------------------------
 
-  unset option_applicationpath
-  unset option_isodirectory
+  local option_applicationpath
+  local option_isodirectory
   local option_nointeraction="false"
 
   local long_option
@@ -2712,6 +2720,7 @@ main() {
   local install_disk_image
   local install_disk_volname
   local core_services_directory
+  local result
 
   case "${installer_application_type}" in
 
@@ -2782,10 +2791,8 @@ main() {
       install_disk_image="${g_tmp_directory}/InstallDisk.sparseimage"
       install_disk_volname="InstallMedia.${random_string}"
       hdiutil create -size 32g "${install_disk_image}" -type SPARSE -fs HFS+J -volname "${install_disk_volname}" >/dev/null || exit_with_status 225 "Failed to create disk image."
-      g_install_disk_device_node="$(hdiutil attach "${install_disk_image}" -readwrite -nobrowse -noverify 2>/dev/null | (
-        IFS=$' \t\n' read -r device_node remainder
-        echo "${device_node}"
-      ))" || exit_with_status 232 "The disk image did not mount."
+      result="$(hdiutil attach "${install_disk_image}" -readwrite -nobrowse -noverify 2>/dev/null)" || exit_with_status 232 "The disk image did not mount."
+      g_install_disk_device_node="${result%%[$' \t\n']*}"
 
       create_install_media "${installer_application_path}" "${install_disk_volname}" || exit_with_status 224 "Failed to convert disk image into bootable install media."
 
