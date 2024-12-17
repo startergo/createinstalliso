@@ -437,6 +437,33 @@ is_not_empty() {
 }
 
 ##
+## @brief      Determines whether the script is sourced.
+##
+## @retval     `true`   The script is sourced.
+## @retval     `false`  Otherwise.
+##
+is_sourced() {
+  are_not_same_file "${BASH_SOURCE[0]}" "${0}"
+}
+
+##
+## @brief      Determines whether both files or directories are the
+##             same.
+##
+## @param      $1       The 1st file or directory.
+## @param      $2       The 2nd file or directory.
+##
+## @retval     `true`   Both files or directories are the same.
+## @retval     `false`  Otherwise.
+##
+are_not_same_file() {
+  local +x -r file_or_directory_1="$1"
+  local +x -r file_or_directory_2="$2"
+
+  [[ ! "${file_or_directory_1}" -ef "${file_or_directory_2}" ]]
+}
+
+##
 ## @brief      Determines whether an item matches a regex expression in
 ##             an array. The array is passed to the function by
 ##             reference via its name.
@@ -2317,6 +2344,10 @@ exit_with_missing_disk_space() {
 ## @param      $@    See function 'print_error_usage()'.
 ##
 main() {
+  if is_sourced; then
+    return 0
+  fi
+
   set_shell_options
   set_traps
   set_environment_variables
