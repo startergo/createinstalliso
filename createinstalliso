@@ -698,7 +698,6 @@ set_shell_options() {
 ##
 ## @brief      Sets the shell options for exit.
 ##
-# shellcheck disable=SC2317
 set_shell_options_for_exit() {
   set +o errexit
 }
@@ -783,7 +782,6 @@ signal_handler() {
 ##
 ## @brief      Performs the required cleanup of allocated ressources.
 ##
-# shellcheck disable=SC2317
 cleanup() {
   if is_not_empty "${g_tmp_directory-}" && is_existing "${g_tmp_directory}"; then
     if is_not_empty "${g_install_esd_mountpoint-}" && is_existing "${g_install_esd_mountpoint}"; then
