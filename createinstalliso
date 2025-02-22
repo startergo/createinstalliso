@@ -25,6 +25,7 @@ declare +x -r SCRIPT_NAME="createinstalliso"
 declare +x -r SCRIPT_VERSION="develop"
 declare +x -r MINIMUM_REQUIRED_MACOS_VERSION_STRING="10.6"
 declare +x -r -i ROOT_UID=0
+declare +x -r -i SIGQUIT_NUMBER=3
 
 # List of unsupported macOS versions.
 #
@@ -696,29 +697,12 @@ set_shell_options() {
 }
 
 ##
-## @brief      Sets the shell options for exit.
-##
-set_shell_options_for_exit() {
-  set +o errexit
-}
-
-##
 ## @brief      Sets the traps for 'EXIT' and signal handling.
 ##
 set_traps() {
-  local +x -i signal_number
-
   trap "exit_handler" EXIT
-
-  #  1 - SIGHUP
-  #  2 - SIGINT
-  #  3 - SIGQUIT
-  #  6 - SIGABRT
-  # 15 - SIGTERM
-  for signal_number in 1 2 3 6 15; do
-    # shellcheck disable=SC2064
-    trap "signal_handler ${signal_number}" "${signal_number}"
-  done
+  trap "sigint_handler" SIGINT
+  trap "sigquit_handler" SIGQUIT
 }
 
 ## @brief      Sets the environment variables.
@@ -750,33 +734,26 @@ set_global_variables() {
 ##
 # shellcheck disable=SC2317
 exit_handler() {
-  set_shell_options_for_exit
   trap - EXIT
   cleanup
 }
 
 ##
-## @brief      Handles a signal.
-##
-## @param      $1    The signal number to be handled (e.g. '2' for
-##                   SIGINT).
+## @brief      Handles the 'SIGINT' signal.
 ##
 # shellcheck disable=SC2317
-signal_handler() {
-  local +x -r -i signal_number="$1"
-  local +x -r -i min_signal_number=1
-  local +x -r -i max_signal_number=31
+sigint_handler() {
+  trap - SIGINT
+  kill -s SIGINT "$$"
+}
 
-  set_shell_options_for_exit
-  trap - EXIT
-  cleanup
-
-  trap - "${signal_number}"
-  kill -n "${signal_number}" "$$"
-
-  if (((signal_number >= min_signal_number) && (signal_number <= max_signal_number))); then
-    exit "$((128 + signal_number))"
-  fi
+##
+## @brief      Handles the 'SIGQUIT' signal.
+##
+# shellcheck disable=SC2317
+sigquit_handler() {
+  trap - SIGQUIT
+  exit "$((128 + SIGQUIT_NUMBER))"
 }
 
 ##
