@@ -1926,9 +1926,10 @@ script_createinstallmedia_canceled_by_sigquit() {
 ##
 replace_code_signatures() {
   local +x -r installer_application_path="$1"
+  # shellcheck disable=SC2034
+  local +x file
 
   find "${installer_application_path}" -type f -print0 | while IFS= read -r -d "" file; do
-    local +x file
     local +x -i exit_status
 
     # Check if file has a code signature
