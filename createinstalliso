@@ -24,7 +24,7 @@
 declare +x -r SCRIPT_NAME="createinstalliso"
 declare +x -r SCRIPT_VERSION="develop"
 declare +x -r MINIMUM_REQUIRED_MACOS_VERSION_STRING="10.6"
-declare +x -r -i ROOT_UID=0
+declare +x -r -i ROOT_USER_ID=0
 declare +x -r -i SIGQUIT_NUMBER=3
 
 # List of unsupported macOS versions.
@@ -378,7 +378,7 @@ is_macos() {
 ## @retval     `false`  Otherwise.
 ##
 is_root() {
-  [[ "$(id -u)" -eq "${ROOT_UID}" ]]
+  [[ "$(id -u)" -eq "${ROOT_USER_ID}" ]]
 }
 
 ##
