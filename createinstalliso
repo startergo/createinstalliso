@@ -202,8 +202,8 @@ get_mach_o_executable_architectures() {
   local +x file_output_line_without_file_path
   local +x -a executable_architectures=()
 
-  is_not_empty "${file}" || return 1
-  is_file "${file}" || return 1
+  [[ -n "${file}" ]] || return 1
+  [[ -f "${file}" ]] || return 1
 
   file_output_with_colon_separator="$(file --separator ":" "${file}")"
   file_output_with_space_separator="$(file --separator " " "${file}")"
@@ -250,7 +250,7 @@ get_available_disk_space() {
   local +x -r file_or_directory="$1"
   local +x -i available_kilobytes
 
-  is_not_empty "${file_or_directory}" || return 1
+  [[ -n "${file_or_directory}" ]] || return 1
 
   available_kilobytes="$(df -k "${file_or_directory}" | awk 'FNR==2 { printf("%s\n", $4) }')" || return 1
 
@@ -268,7 +268,7 @@ get_disk_space_used_by_file_or_directory() {
   local +x -r file_or_directory="$1"
   local +x -i used_kilobytes
 
-  is_not_empty "${file_or_directory}" || return 1
+  [[ -n "${file_or_directory}" ]] || return 1
 
   used_kilobytes="$(du -s -k "${file_or_directory}" | awk '{ printf("%s\n", $1) }')" || return 1
 
@@ -288,7 +288,7 @@ get_volume_name() {
   local +x -r file_or_directory="$1"
   local +x volume_name
 
-  is_not_empty "${file_or_directory}" || return 1
+  [[ -n "${file_or_directory}" ]] || return 1
 
   volume_name="$(df "${file_or_directory}" | awk 'FNR==2 { printf("%s\n", $9) }')" || return 1
 
@@ -307,7 +307,7 @@ get_volume_name() {
 get_root_volume_name() {
   local +x plist_file
 
-  is_not_empty "${g_tmp_directory-}" || return 1
+  [[ -n "${g_tmp_directory-}" ]] || return 1
 
   plist_file="${g_tmp_directory}/DiskUtilInfoRoot.plist"
 
@@ -366,7 +366,7 @@ is_mach_o_executable() {
 is_macos() {
   local +x -r os_name="$1"
 
-  is_not_empty "${os_name}" || return 1
+  [[ -n "${os_name}" ]] || return 1
 
   [[ "${os_name}" == "Darwin" ]]
 }
@@ -382,86 +382,13 @@ is_root() {
 }
 
 ##
-## @brief      Determines whether the specified file is existing.
-##
-## @param      $1       The file to be checked.
-##
-## @retval     `true`   The file exists.
-## @retval     `false`  Otherwise.
-##
-is_existing() {
-  local +x -r file_or_directory="$1"
-
-  [[ -e "${file_or_directory}" ]]
-}
-
-##
-## @brief      Determines whether the specified file is a regular file.
-##
-## @param      $1       The file to be checked.
-##
-## @retval     `true`   The file exists and is a regular file.
-## @retval     `false`  Otherwise.
-##
-is_file() {
-  local +x -r file_or_directory="$1"
-
-  [[ -f "${file_or_directory}" ]]
-}
-
-##
-## @brief      Determines whether the specified file is a directory.
-##
-## @param      $1       The file to be checked.
-##
-## @retval     `true`   The file exists and is a directory.
-## @retval     `false`  Otherwise.
-##
-is_directory() {
-  local +x -r file_or_directory="$1"
-
-  [[ -d "${file_or_directory}" ]]
-}
-
-##
-## @brief      Determines whether the specified string is not empty.
-##
-## @param      $1       The string to be checked.
-##
-## @retval     `true`   The length of string is non-zero.
-## @retval     `false`  Otherwise.
-##
-is_not_empty() {
-  local +x -r string="$1"
-
-  [[ -n "${string}" ]]
-}
-
-##
 ## @brief      Determines whether the script is sourced.
 ##
 ## @retval     `true`   The script is sourced.
 ## @retval     `false`  Otherwise.
 ##
 is_sourced() {
-  are_not_same_file "${BASH_SOURCE[0]}" "${0}"
-}
-
-##
-## @brief      Determines whether both files or directories are the
-##             same.
-##
-## @param      $1       The 1st file or directory.
-## @param      $2       The 2nd file or directory.
-##
-## @retval     `true`   Both files or directories are the same.
-## @retval     `false`  Otherwise.
-##
-are_not_same_file() {
-  local +x -r file_or_directory_1="$1"
-  local +x -r file_or_directory_2="$2"
-
-  [[ ! "${file_or_directory_1}" -ef "${file_or_directory_2}" ]]
+  [[ ! "${BASH_SOURCE[0]}" -ef "${0}" ]]
 }
 
 ##
@@ -519,10 +446,10 @@ max() {
 get_absolute_logical_path() {
   local +x -r file_or_directory="$1"
 
-  is_not_empty "${file_or_directory}" || return 1
-  is_existing "${file_or_directory}" || return 1
+  [[ -n "${file_or_directory}" ]] || return 1
+  [[ -e "${file_or_directory}" ]] || return 1
 
-  if is_directory "${file_or_directory}"; then
+  if [[ -d "${file_or_directory}" ]]; then
     echo "$(
       cd "${file_or_directory}"
       pwd -L
@@ -620,8 +547,8 @@ get_plist_value() {
   local +x -r entry="$1"
   local +x -r plist_file="$2"
 
-  is_not_empty "${entry}" || return 1
-  is_not_empty "${plist_file}" || return 1
+  [[ -n "${entry}" ]] || return 1
+  [[ -n "${plist_file}" ]] || return 1
 
   execute_plist_buddy_command "Print '${entry}'" "${plist_file}"
 }
@@ -638,9 +565,9 @@ set_plist_value() {
   local +x -r value="$2"
   local +x -r plist_file="$3"
 
-  is_not_empty "${entry}" || return 1
-  is_not_empty "${value}" || return 1
-  is_not_empty "${plist_file}" || return 1
+  [[ -n "${entry}" ]] || return 1
+  [[ -n "${value}" ]] || return 1
+  [[ -n "${plist_file}" ]] || return 1
 
   execute_plist_buddy_command "Set '${entry}' '${value}'" "${plist_file}" >/dev/null
 }
@@ -657,8 +584,8 @@ execute_plist_buddy_command() {
   local +x -r plist_command="$1"
   local +x -r plist_file="$2"
 
-  is_not_empty "${plist_command}" || return 1
-  is_not_empty "${plist_file}" || return 1
+  [[ -n "${plist_command}" ]] || return 1
+  [[ -n "${plist_file}" ]] || return 1
 
   /usr/libexec/PlistBuddy -c "${plist_command}" "${plist_file}" 2>/dev/null
 }
@@ -760,23 +687,23 @@ sigquit_handler() {
 ## @brief      Performs the required cleanup of allocated ressources.
 ##
 cleanup() {
-  if is_not_empty "${g_tmp_directory-}" && is_existing "${g_tmp_directory}"; then
-    if is_not_empty "${g_install_esd_mountpoint-}" && is_existing "${g_install_esd_mountpoint}"; then
+  if [[ -n "${g_tmp_directory-}" ]] && [[ -e "${g_tmp_directory}" ]]; then
+    if [[ -n "${g_install_esd_mountpoint-}" ]] && [[ -e "${g_install_esd_mountpoint}" ]]; then
       hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null && unset g_install_esd_mountpoint
     fi
 
-    if is_not_empty "${g_install_disk_mountpoint-}" && is_existing "${g_install_disk_mountpoint}"; then
+    if [[ -n "${g_install_disk_mountpoint-}" ]] && [[ -e "${g_install_disk_mountpoint}" ]]; then
       hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null && unset g_install_disk_mountpoint
     fi
 
-    if is_not_empty "${g_install_disk_device_node-}" && is_existing "${g_install_disk_device_node}"; then
+    if [[ -n "${g_install_disk_device_node-}" ]] && [[ -e "${g_install_disk_device_node}" ]]; then
       hdiutil detach "${g_install_disk_device_node}" -force >/dev/null && unset g_install_disk_device_node
     fi
 
     rm -rf "${g_tmp_directory}" >/dev/null && unset g_tmp_directory
   fi
 
-  if is_not_empty "${g_incomplete_iso_destination_image-}" && is_existing "${g_incomplete_iso_destination_image}"; then
+  if [[ -n "${g_incomplete_iso_destination_image-}" ]] && [[ -e "${g_incomplete_iso_destination_image}" ]]; then
     rm -rf "${g_incomplete_iso_destination_image}" >/dev/null && unset g_incomplete_iso_destination_image
   fi
 }
@@ -813,7 +740,7 @@ kill_process_group_with_signal_name() {
   local +x -r signal_name="$1"
   local +x pgid
 
-  is_not_empty "${signal_name}" || return 1
+  [[ -n "${signal_name}" ]] || return 1
 
   pgid="$(ps -o pgid= "$$")"
   pgid="$(trim "${pgid}")"
@@ -1121,9 +1048,9 @@ is_supported_macos_version_string() {
 is_valid_iso_directory_path() {
   local +x -r iso_directory_path="$1"
 
-  is_not_empty "${iso_directory_path}" || return 1
+  [[ -n "${iso_directory_path}" ]] || return 1
 
-  is_directory "${iso_directory_path}"
+  [[ -d "${iso_directory_path}" ]]
 }
 
 ##
@@ -1151,21 +1078,21 @@ is_valid_installer_application_path() {
 
   local +x system_image_url
 
-  is_not_empty "${installer_application_path}" || return 1
-  is_directory "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
+  [[ -d "${installer_application_path}" ]] || return 1
 
   # Check if the installer application display name can be retrieved.
   # The installer application display name is required to verify the
   # compatibility of the script.
   installer_application_display_name="$(get_installer_application_display_name "${installer_application_path}")" || return 1
-  is_not_empty "${installer_application_display_name}" || return 1
+  [[ -n "${installer_application_display_name}" ]] || return 1
 
   # This file is required because it contains the value for
   # 'LSMinimumSystemVersion', which is the minimum system version
   # required for the installer application. This version is used in
   # case the installer application is not explicitly listed in the
   # function 'get_minimum_macos_version_string'.
-  if is_file "${installer_application_path}/Contents/Info.plist"; then
+  if [[ -f "${installer_application_path}/Contents/Info.plist" ]]; then
     installer_application_minimum_system_version="$(get_installer_application_minimum_system_version "${installer_application_path}")" || return 1
     [[ "${installer_application_minimum_system_version}" =~ ${valid_installer_application_minimum_system_version} ]] || return 1
   else
@@ -1189,7 +1116,7 @@ is_valid_installer_application_path() {
     1)
       # This file is required because it will be used as source
       # to create the installer disk image.
-      is_file "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg" || return 1
+      [[ -f "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg" ]] || return 1
 
       return 0
       ;;
@@ -1201,15 +1128,15 @@ is_valid_installer_application_path() {
     2)
       # This file is required because it contains all the files
       # required to build the installer disk image.
-      is_file "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg" || return 1
+      [[ -f "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg" ]] || return 1
 
       # All subsequent checks are the same as those performed by
       # Apple's command 'createinstallmedia' to determine if the
       # OS installer application is valid.
-      is_file "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg" || return 1
-      is_file "${installer_application_path}/Contents/SharedSupport/OSInstall.mpkg" || return 1
+      [[ -f "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg" ]] || return 1
+      [[ -f "${installer_application_path}/Contents/SharedSupport/OSInstall.mpkg" ]] || return 1
 
-      if is_file "${installer_application_path}/Contents/Info.plist"; then
+      if [[ -f "${installer_application_path}/Contents/Info.plist" ]]; then
         installer_application_identifier="$(get_installer_application_identifier "${installer_application_path}")" || return 1
         [[ "${installer_application_identifier}" =~ ${valid_installer_application_identifier_regex} ]] || return 1
 
@@ -1230,12 +1157,12 @@ is_valid_installer_application_path() {
     3)
       # Apple's command 'createinstallmedia' is required because
       # it will be used to create the installer disk image.
-      is_file "${installer_application_path}/Contents/Resources/createinstallmedia" || return 1
+      [[ -f "${installer_application_path}/Contents/Resources/createinstallmedia" ]] || return 1
 
       # All subsequent checks are the same as those performed by
       # Apple's command 'createinstallmedia' to determine if the
       # OS installer application is valid.
-      if is_file "${installer_application_path}/Contents/Info.plist"; then
+      if [[ -f "${installer_application_path}/Contents/Info.plist" ]]; then
         installer_application_identifier="$(get_installer_application_identifier "${installer_application_path}")" || return 1
         [[ "${installer_application_identifier}" =~ ${valid_installer_application_identifier_regex} ]] || return 1
 
@@ -1245,9 +1172,9 @@ is_valid_installer_application_path() {
         return 1
       fi
 
-      if is_file "${installer_application_path}/Contents/SharedSupport/InstallInfo.plist"; then
+      if [[ -f "${installer_application_path}/Contents/SharedSupport/InstallInfo.plist" ]]; then
         system_image_url="$(get_system_image_url "${installer_application_path}")" || return 1
-        is_file "${installer_application_path}/Contents/SharedSupport/${system_image_url}" || return 1
+        [[ -f "${installer_application_path}/Contents/SharedSupport/${system_image_url}" ]] || return 1
       else
         return 1
       fi
@@ -1264,19 +1191,19 @@ is_valid_installer_application_path() {
     4)
       # Apple's command 'createinstallmedia' is required because
       # it will be used to create the installer disk image.
-      is_file "${installer_application_path}/Contents/Resources/createinstallmedia" || return 1
+      [[ -f "${installer_application_path}/Contents/Resources/createinstallmedia" ]] || return 1
 
       # All subsequent checks are the same as those performed by
       # Apple's command 'createinstallmedia' to determine if the
       # OS installer application is valid.
-      if is_file "${installer_application_path}/Contents/Info.plist"; then
+      if [[ -f "${installer_application_path}/Contents/Info.plist" ]]; then
         installer_application_identifier="$(get_installer_application_identifier "${installer_application_path}")" || return 1
         [[ "${installer_application_identifier}" =~ ${valid_installer_application_identifier_regex} ]] || return 1
       else
         return 1
       fi
 
-      is_file "${installer_application_path}/Contents/SharedSupport/SharedSupport.dmg" || return 1
+      [[ -f "${installer_application_path}/Contents/SharedSupport/SharedSupport.dmg" ]] || return 1
 
       return 0
       ;;
@@ -1395,7 +1322,7 @@ is_supported_installer_application_display_name() {
 get_installer_application_display_name() {
   local +x -r installer_application_path="$1"
 
-  is_not_empty "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
 
   get_plist_value ":CFBundleDisplayName" "${installer_application_path}/Contents/Info.plist"
 }
@@ -1437,18 +1364,18 @@ get_installer_application_type() {
   local +x -r installer_application_path="$1"
   local +x -i installer_application_type=0
 
-  is_not_empty "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
 
   # Each type of installer application must contain the directory
   # '/Contents/SharedSupport/'. If it does not exist, the type of the
   # installer application is unknown or the installer application is
   # an incomplete stub installer.
-  if is_directory "${installer_application_path}/Contents/SharedSupport/"; then
-    if is_file "${installer_application_path}/Contents/Resources/createinstallmedia"; then
-      if is_file "${installer_application_path}/Contents/SharedSupport/InstallInfo.plist"; then
+  if [[ -d "${installer_application_path}/Contents/SharedSupport/" ]]; then
+    if [[ -f "${installer_application_path}/Contents/Resources/createinstallmedia" ]]; then
+      if [[ -f "${installer_application_path}/Contents/SharedSupport/InstallInfo.plist" ]]; then
         installer_application_type=3
       else
-        if is_file "${installer_application_path}/Contents/SharedSupport/SharedSupport.dmg"; then
+        if [[ -f "${installer_application_path}/Contents/SharedSupport/SharedSupport.dmg" ]]; then
           installer_application_type=4
         else
           installer_application_type=2
@@ -1538,8 +1465,8 @@ get_disk_image_total_non_empty_bytes() {
   local +x -r disk_image="$1"
   local +x plist_file
 
-  is_not_empty "${disk_image}" || return 1
-  is_not_empty "${g_tmp_directory-}" || return 1
+  [[ -n "${disk_image}" ]] || return 1
+  [[ -n "${g_tmp_directory-}" ]] || return 1
 
   plist_file="${disk_image##*/}"
   plist_file="${g_tmp_directory}/${plist_file%.*}ImageInfo.plist"
@@ -1592,7 +1519,7 @@ get_offset_for_iso_directory_path() {
 get_installer_application_minimum_system_version() {
   local +x -r installer_application_path="$1"
 
-  is_not_empty "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
 
   get_plist_value ":LSMinimumSystemVersion" "${installer_application_path}/Contents/Info.plist"
 }
@@ -1608,7 +1535,7 @@ get_installer_application_minimum_system_version() {
 get_installer_application_short_version_string() {
   local +x -r installer_application_path="$1"
 
-  is_not_empty "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
 
   get_plist_value ":CFBundleShortVersionString" "${installer_application_path}/Contents/Info.plist"
 }
@@ -1624,8 +1551,8 @@ set_installer_application_short_version_string() {
   local +x -r installer_application_path="$1"
   local +x -r value="$2"
 
-  is_not_empty "${installer_application_path}" || return 1
-  is_not_empty "${value}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
+  [[ -n "${value}" ]] || return 1
 
   set_plist_value ":CFBundleShortVersionString" "${value}" "${installer_application_path}/Contents/Info.plist"
 }
@@ -1640,7 +1567,7 @@ set_installer_application_short_version_string() {
 get_installer_application_identifier() {
   local +x -r installer_application_path="$1"
 
-  is_not_empty "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
 
   get_plist_value ":CFBundleIdentifier" "${installer_application_path}/Contents/Info.plist"
 }
@@ -1656,7 +1583,7 @@ get_installer_application_identifier() {
 get_system_image_url() {
   local +x -r installer_application_path="$1"
 
-  is_not_empty "${installer_application_path}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
 
   get_plist_value ":System Image Info:URL" "${installer_application_path}/Contents/SharedSupport/InstallInfo.plist"
 }
@@ -1734,8 +1661,8 @@ create_install_media() {
   local +x unused
   local +x -i exit_status
 
-  is_not_empty "${installer_application_path}" || return 1
-  is_not_empty "${install_disk_volname}" || return 1
+  [[ -n "${installer_application_path}" ]] || return 1
+  [[ -n "${install_disk_volname}" ]] || return 1
 
   if [[ "${g_replace_code_signatures_in_installer_application}" == "true" ]]; then
     echo "Verifying installer application..."
@@ -1958,11 +1885,11 @@ create_iso_image() {
   local +x unused
   local +x -i exit_status
 
-  is_not_empty "${iso_source_image}" || return 1
-  is_not_empty "${iso_destination_image}" || return 1
-  is_not_empty "${default_volume_name}" || return 1
+  [[ -n "${iso_source_image}" ]] || return 1
+  [[ -n "${iso_destination_image}" ]] || return 1
+  [[ -n "${default_volume_name}" ]] || return 1
 
-  is_existing "${iso_source_image}" || return 1
+  [[ -e "${iso_source_image}" ]] || return 1
 
   { unused="$({ script -k -q "${typescript_file}" hdiutil makehybrid -o "${iso_destination_image}" "${iso_source_image}" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1
   exit_status="$?"
@@ -2130,7 +2057,7 @@ parse_create_iso_image() {
 script_hdiutil_makehybrid_canceled_by_sigint() {
   local +x -r typescript_file="$1"
 
-  is_not_empty "${typescript_file}" || return 1
+  [[ -n "${typescript_file}" ]] || return 1
 
   grep --regexp="canceling\.\.\." "${typescript_file}" >/dev/null
 }
@@ -2239,7 +2166,7 @@ create_decimal_number() {
   # Remove trailing '0's from fractional part
   fractional_part="${fractional_part%%0}"
 
-  if is_not_empty "${fractional_part}"; then
+  if [[ -n "${fractional_part}" ]]; then
     decimal_number="${decimal_number}${localized_decimal_separator}${fractional_part}"
   fi
 
@@ -2558,8 +2485,8 @@ main() {
 
   local +x type_of_existing_destination
 
-  if is_existing "${iso_destination_image}"; then
-    if is_file "${iso_destination_image}"; then
+  if [[ -e "${iso_destination_image}" ]]; then
+    if [[ -f "${iso_destination_image}" ]]; then
       type_of_existing_destination="file"
     else
       type_of_existing_destination="directory"
@@ -2741,7 +2668,7 @@ main() {
       hdiutil attach "${install_esd_image}" -readonly -mountpoint "${g_install_esd_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 236 "Mount of outer dmg failed."
 
       base_system_image="${g_install_esd_mountpoint}/BaseSystem.dmg"
-      is_file "${base_system_image}" || exit_with_status 235 "BaseSystem missing from the outer dmg, damaged installer image?"
+      [[ -f "${base_system_image}" ]] || exit_with_status 235 "BaseSystem missing from the outer dmg, damaged installer image?"
 
       install_disk_image="${g_tmp_directory}/InstallDisk.sparseimage"
       g_install_disk_mountpoint="${g_tmp_directory}/InstallDisk"
