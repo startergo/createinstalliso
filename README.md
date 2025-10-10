@@ -274,7 +274,7 @@ The table below lists all possible exit status and corresponding messages:
 | 242    | Couldn't get installer application display name.                                      |
 | 241    | Couldn't get installer application type.                                              |
 | 240    | Failed to create temporary directory.                                                 |
-| 239    | Couldn't get device ID.                                                               |
+| 239    | Couldn't get device ID for \[DIRECTORY\].                                             |
 | 238    | You need \[VERSION\] or later to create an ISO image from this installer application. |
 | 237    | Failed to delete the \[FILETYPE\] \[FILE\].                                           |
 | 236    | Mount of outer dmg failed.                                                            |
@@ -298,6 +298,18 @@ The table below lists all possible exit status and corresponding messages:
 | 218    | Failed to patch macOS Sierra installer application.                                   |
 | 217    | Failed to replace code signatures.                                                    |
 | 216    | Failed to replace modified files with original ones.                                  |
+| 215    | Couldn't set shell options.                                                           |
+| 214    | Couldn't set shell traps.                                                             |
+| 213    | Couldn't set environment variables.                                                   |
+| 212    | Couldn't set global variables.                                                        |
+| 211    | Couldn't get effective user ID.                                                       |
+| 210    | Couldn't create example installer application name.                                   |
+| 209    | Couldn't get Mach-O executable architectures in createinstallmedia.                   |
+| 208    | Couldn't get volume name for \[DIRECTORY\].                                           |
+| 207    | Couldn't get available disk space on the filesystem of \[DIRECTORY\].                 |
+| 206    | Couldn't get total non-empty bytes in disk image \[FILE\].                            |
+| 205    | Couldn't get disk space used by \[DIRECTORY\].                                        |
+| 204    | Couldn't create human-readable byte size for \[INTEGER\].                             |
 
 ## License
 
