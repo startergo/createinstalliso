@@ -2288,7 +2288,7 @@ create_decimal_number() {
 has_option_applicationpath() {
   local +x -r installer_application_path="$1"
   local +x createinstallmedia_output
-  local +x -r option_applicationpath_regex='.*--applicationpath.*'
+  local +x -r option_applicationpath_regex='--applicationpath[^[:alpha:]]'
 
   createinstallmedia_output="$("${installer_application_path}/Contents/Resources/createinstallmedia" 2>&1)" || return 1
 
