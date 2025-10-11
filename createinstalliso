@@ -236,7 +236,7 @@ get_mach_o_executable_architectures() {
     fi
   fi
 
-  IFS=' ' echo "${executable_architectures[@]}"
+  IFS=' ' echo "${executable_architectures[*]}"
 }
 
 ##
