@@ -2143,7 +2143,7 @@ has_script_hdiutil_makehybrid_been_canceled_by_sigint() {
 
   [[ -n "${typescript_file}" ]] || return 1
 
-  /usr/bin/grep --regexp="canceling\.\.\." "${typescript_file}" >/dev/null
+  /usr/bin/grep --fixed-strings "canceling..." "${typescript_file}" >/dev/null
 }
 
 ##
