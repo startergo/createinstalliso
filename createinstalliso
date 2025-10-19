@@ -203,19 +203,6 @@ get_basename() {
 }
 
 ##
-## @brief      Gets the name of the current operating system.
-##
-## @return     The operating system name.
-##
-get_os_name() {
-  local +x os_name
-
-  os_name="$(/usr/bin/uname -s 2>/dev/null)" || return 1
-
-  echo "${os_name}"
-}
-
-##
 ## @brief      Gets a space-delimited list of the architectures of all
 ##             Mach-O executables in the specified file.
 ##
@@ -2387,7 +2374,7 @@ main() {
   local +x -i macos_version_for_compare
   local +x macos_name_and_version
 
-  os_name="$(get_os_name)" || exit_with_status 251 "Couldn't get operating system name."
+  os_name="$(/usr/bin/uname -s 2>/dev/null)" || exit_with_status 251 "Couldn't get operating system name."
   is_macos "${os_name}" || exit_with_status 250 "This tool must be run on macOS."
 
   macos_version_string="$(/usr/bin/sw_vers -productVersion 2>/dev/null)" || exit_with_status 248 "Couldn't get macOS version."
