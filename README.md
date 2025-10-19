@@ -216,31 +216,32 @@ The installer application types are:
 
 **createinstalliso** uses a number of external commands, which must be available on your system:
 
-- `awk`
-- `bless`
-- `codesign`
-- `cp`
-- `cut`
-- `df`
-- `ditto`
-- `du`
-- `file`
-- `grep`
-- `hdiutil`
-- `mktemp`
-- `ps`
-- `pwd`
-- `rm`
-- `rsync`
-- `script`
-- `seq`
-- `stat`
-- `sw_vers`
-- `sysctl`
-- `tput`
-- `uname`
-- `xattr`
-- `/usr/libexec/PlistBuddy`.
+- `/bin/cp`
+- `/bin/df`
+- `/bin/ps`
+- `/bin/rm`
+- `/usr/bin/awk`
+- `/usr/bin/codesign`
+- `/usr/bin/cut`
+- `/usr/bin/ditto`
+- `/usr/bin/du`
+- `/usr/bin/file`
+- `/usr/bin/find`
+- `/usr/bin/grep`
+- `/usr/bin/hdiutil`
+- `/usr/bin/id`
+- `/usr/bin/mktemp`
+- `/usr/bin/rsync`
+- `/usr/bin/script`
+- `/usr/bin/stat`
+- `/usr/bin/sw_vers`
+- `/usr/bin/tput`
+- `/usr/bin/uname`
+- `/usr/bin/xattr`
+- `/usr/libexec/PlistBuddy`
+- `/usr/sbin/bless`
+- `/usr/sbin/diskutil`
+- `/usr/sbin/sysctl`
 
 Unless you have deliberately modified your system, all of the above commands are available on the macOS versions listed in the section "[Compatibility](#user-content-compatibility)".
 
@@ -302,14 +303,15 @@ The table below lists all possible exit status and corresponding messages:
 | 214    | Couldn't set shell traps.                                                             |
 | 213    | Couldn't set environment variables.                                                   |
 | 212    | Couldn't set global variables.                                                        |
-| 211    | Couldn't get effective user ID.                                                       |
-| 210    | Couldn't create example installer application name.                                   |
-| 209    | Couldn't get Mach-O executable architectures in createinstallmedia.                   |
-| 208    | Couldn't get volume name for \[DIRECTORY\].                                           |
-| 207    | Couldn't get available disk space on the filesystem of \[DIRECTORY\].                 |
-| 206    | Couldn't get total non-empty bytes in disk image \[FILE\].                            |
-| 205    | Couldn't get disk space used by \[DIRECTORY\].                                        |
-| 204    | Couldn't create human-readable byte size for \[INTEGER\].                             |
+| 211    | External command \[FILE\] is missing or can not be executed.                          |
+| 210    | Couldn't get effective user ID.                                                       |
+| 209    | Couldn't create example installer application name.                                   |
+| 208    | Couldn't get Mach-O executable architectures in createinstallmedia.                   |
+| 207    | Couldn't get volume name for \[DIRECTORY\].                                           |
+| 206    | Couldn't get available disk space on the filesystem of \[DIRECTORY\].                 |
+| 205    | Couldn't get total non-empty bytes in disk image \[FILE\].                            |
+| 204    | Couldn't get disk space used by \[DIRECTORY\].                                        |
+| 203    | Couldn't create human-readable byte size for \[INTEGER\].                             |
 
 ## License
 

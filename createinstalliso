@@ -113,6 +113,35 @@ declare +x -r -a KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX=(
   '^15\.[[:digit:]]+(\.[[:digit:]]+)?$ # macOS Sequoia'         # 15
 )
 
+declare +x -r -a EXTERNAL_COMMANDS=(
+  '/bin/cp'
+  '/bin/df'
+  '/bin/ps'
+  '/bin/rm'
+  '/usr/bin/awk'
+  '/usr/bin/codesign'
+  '/usr/bin/cut'
+  '/usr/bin/ditto'
+  '/usr/bin/du'
+  '/usr/bin/file'
+  '/usr/bin/find'
+  '/usr/bin/grep'
+  '/usr/bin/hdiutil'
+  '/usr/bin/id'
+  '/usr/bin/mktemp'
+  '/usr/bin/rsync'
+  '/usr/bin/script'
+  '/usr/bin/stat'
+  '/usr/bin/sw_vers'
+  '/usr/bin/tput'
+  '/usr/bin/uname'
+  '/usr/bin/xattr'
+  '/usr/libexec/PlistBuddy'
+  '/usr/sbin/bless'
+  '/usr/sbin/diskutil'
+  '/usr/sbin/sysctl'
+)
+
 # ======================================================================
 # Global variables
 # ======================================================================
@@ -181,7 +210,7 @@ get_basename() {
 get_os_name() {
   local +x os_name
 
-  os_name="$(uname -s 2>/dev/null)" || return 1
+  os_name="$(/usr/bin/uname -s 2>/dev/null)" || return 1
 
   echo "${os_name}"
 }
@@ -209,8 +238,8 @@ get_mach_o_executable_architectures() {
   [[ -n "${file}" ]] || return 1
   [[ -f "${file}" ]] || return 1
 
-  file_output_with_colon_separator="$(file --separator ":" "${file}")" || return 1
-  file_output_with_space_separator="$(file --separator " " "${file}")" || return 1
+  file_output_with_colon_separator="$(/usr/bin/file --separator ":" "${file}")" || return 1
+  file_output_with_space_separator="$(/usr/bin/file --separator " " "${file}")" || return 1
   output_length="${#file_output_with_colon_separator}"
 
   # Search for the first character that differs in both strings
@@ -257,7 +286,7 @@ get_available_disk_space() {
 
   [[ -n "${file_or_directory}" ]] || return 1
 
-  available_kilobytes="$(df -k "${file_or_directory}" | awk 'FNR==2 { printf("%s\n", $4) }')" || return 1
+  available_kilobytes="$(/bin/df -k "${file_or_directory}" | /usr/bin/awk 'FNR==2 { printf("%s\n", $4) }')" || return 1
 
   echo "$((available_kilobytes * 1024))"
 }
@@ -275,7 +304,7 @@ get_disk_space_used_by_file_or_directory() {
 
   [[ -n "${file_or_directory}" ]] || return 1
 
-  used_kilobytes="$(du -s -k "${file_or_directory}" | awk '{ printf("%s\n", $1) }')" || return 1
+  used_kilobytes="$(/usr/bin/du -s -k "${file_or_directory}" | /usr/bin/awk '{ printf("%s\n", $1) }')" || return 1
 
   echo "$((used_kilobytes * 1024))"
 }
@@ -295,7 +324,7 @@ get_volume_name() {
 
   [[ -n "${file_or_directory}" ]] || return 1
 
-  volume_name="$(df "${file_or_directory}" | awk 'FNR==2 { printf("%s\n", $9) }')" || return 1
+  volume_name="$(/bin/df "${file_or_directory}" | /usr/bin/awk 'FNR==2 { printf("%s\n", $9) }')" || return 1
 
   if [[ "${volume_name}" == "/" ]]; then
     volume_name="/Volumes/$(get_root_volume_name)" || return 1
@@ -316,7 +345,7 @@ get_root_volume_name() {
 
   plist_file="${g_tmp_directory}/DiskUtilInfoRoot.plist"
 
-  diskutil info -plist / >"${plist_file}" 2>/dev/null || return 1
+  /usr/sbin/diskutil info -plist / >"${plist_file}" 2>/dev/null || return 1
 
   get_plist_value ":VolumeName" "${plist_file}"
 }
@@ -332,7 +361,7 @@ is_apple_silicon_mac() {
   local +x result
 
   exit_status=0
-  result="$(sysctl -n "hw.optional.arm64" 2>/dev/null)" || exit_status="$?"
+  result="$(/usr/sbin/sysctl -n "hw.optional.arm64" 2>/dev/null)" || exit_status="$?"
 
   [[ ("${exit_status}" -eq 0) && ("${result}" == "1") ]]
 }
@@ -541,7 +570,7 @@ get_trimmed_field_content() {
   local +x -r -i field_number="$2"
   local +x field
 
-  field="$(cut -d# -f"${field_number}" <<<"${string}")" || return 1
+  field="$(/usr/bin/cut -d# -f"${field_number}" <<<"${string}")" || return 1
 
   trim "${field}"
 }
@@ -735,22 +764,22 @@ sigquit_handler() {
 cleanup() {
   if [[ -n "${g_tmp_directory-}" ]] && [[ -e "${g_tmp_directory}" ]]; then
     if [[ -n "${g_install_esd_mountpoint-}" ]] && [[ -e "${g_install_esd_mountpoint}" ]]; then
-      hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null && unset g_install_esd_mountpoint || true
+      /usr/bin/hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null && unset g_install_esd_mountpoint || true
     fi
 
     if [[ -n "${g_install_disk_mountpoint-}" ]] && [[ -e "${g_install_disk_mountpoint}" ]]; then
-      hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null && unset g_install_disk_mountpoint || true
+      /usr/bin/hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null && unset g_install_disk_mountpoint || true
     fi
 
     if [[ -n "${g_install_disk_device_node-}" ]] && [[ -e "${g_install_disk_device_node}" ]]; then
-      hdiutil detach "${g_install_disk_device_node}" -force >/dev/null && unset g_install_disk_device_node || true
+      /usr/bin/hdiutil detach "${g_install_disk_device_node}" -force >/dev/null && unset g_install_disk_device_node || true
     fi
 
-    rm -rf "${g_tmp_directory}" >/dev/null && unset g_tmp_directory || true
+    /bin/rm -rf "${g_tmp_directory}" >/dev/null && unset g_tmp_directory || true
   fi
 
   if [[ -n "${g_incomplete_iso_destination_image-}" ]] && [[ -e "${g_incomplete_iso_destination_image}" ]]; then
-    rm -rf "${g_incomplete_iso_destination_image}" >/dev/null && unset g_incomplete_iso_destination_image || true
+    /bin/rm -rf "${g_incomplete_iso_destination_image}" >/dev/null && unset g_incomplete_iso_destination_image || true
   fi
 
   return 0
@@ -790,7 +819,7 @@ kill_process_group_with_signal_name() {
 
   [[ -n "${signal_name}" ]] || return 1
 
-  pgid="$(ps -o pgid= "$$")" || return 1
+  pgid="$(/bin/ps -o pgid= "$$")" || return 1
   pgid="$(trim "${pgid}")" || return 1
 
   kill -s "${signal_name}" -- -"${pgid}"
@@ -1526,7 +1555,7 @@ get_disk_image_total_non_empty_bytes() {
   plist_file="${disk_image##*/}"
   plist_file="${g_tmp_directory}/${plist_file%.*}ImageInfo.plist"
 
-  hdiutil imageinfo "${disk_image}" -plist >"${plist_file}" 2>/dev/null || return 1
+  /usr/bin/hdiutil imageinfo "${disk_image}" -plist >"${plist_file}" 2>/dev/null || return 1
 
   get_plist_value ":Size Information:Total Non-Empty Bytes" "${plist_file}"
 }
@@ -1742,7 +1771,7 @@ create_install_media() {
   fi
 
   exit_status=0
-  { unused="$({ script -k -q /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  { unused="$({ /usr/bin/script -k -q /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
 
   if has_script_createinstallmedia_been_canceled_by_sigint "${exit_status}"; then
     kill_process_group_with_signal_name "SIGINT" || true
@@ -1924,16 +1953,16 @@ replace_code_signatures() {
   # shellcheck disable=SC2034
   local +x file
 
-  find "${installer_application_path}" -type f -print0 | while IFS= read -r -d "" file; do
+  /usr/bin/find "${installer_application_path}" -type f -print0 | while IFS= read -r -d "" file; do
     local +x -i exit_status
 
     # Check if file has a code signature
     exit_status=0
-    codesign -d "${file}" >/dev/null 2>&1 || exit_status="$?"
+    /usr/bin/codesign -d "${file}" >/dev/null 2>&1 || exit_status="$?"
 
     # Replace existing code signature with adhoc signature
     if [[ "${exit_status}" -eq 0 ]]; then
-      codesign --sign - --force "${file}" >/dev/null 2>&1 || return 1
+      /usr/bin/codesign --sign - --force "${file}" >/dev/null 2>&1 || return 1
     fi
   done
 }
@@ -1960,7 +1989,7 @@ create_iso_image() {
   [[ -e "${iso_source_image}" ]] || return 1
 
   exit_status=0
-  { unused="$({ script -k -q "${typescript_file}" hdiutil makehybrid -o "${iso_destination_image}" "${iso_source_image}" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  { unused="$({ /usr/bin/script -k -q "${typescript_file}" /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "${iso_source_image}" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
 
   if has_script_hdiutil_makehybrid_been_canceled_by_sigint "${typescript_file}"; then
     kill_process_group_with_signal_name "SIGINT" || true
@@ -2017,7 +2046,7 @@ parse_create_iso_image() {
   local +x is_line_mute="false"
   local +x is_mute="false"
   local +x is_progress_line="false"
-  local +x -r shell_columns="$(tput cols 2>/dev/tty)"
+  local +x -r shell_columns="$(/usr/bin/tput cols 2>/dev/tty)"
   local +x -r -i dot_count_max="$((shell_columns - 2))"
   local +x -i dot_count=0
   local +x -i dot_increment
@@ -2127,7 +2156,7 @@ has_script_hdiutil_makehybrid_been_canceled_by_sigint() {
 
   [[ -n "${typescript_file}" ]] || return 1
 
-  grep --regexp="canceling\.\.\." "${typescript_file}" >/dev/null
+  /usr/bin/grep --regexp="canceling\.\.\." "${typescript_file}" >/dev/null
 }
 
 ##
@@ -2217,7 +2246,7 @@ create_human_readable_byte_size() {
 
   # Add '0's to integer part if required
   if ((integer_part_number_of_digits > 3)); then
-    ((integer_part = "${integer_part}$(printf "0%.0s" $(seq 1 $((integer_part_number_of_digits - 3))))"))
+    ((integer_part *= 10 ** (integer_part_number_of_digits - 3)))
   fi
 
   fractional_part="${first_three_digits:$((integer_part_number_of_digits))}"
@@ -2333,8 +2362,20 @@ main() {
   set_environment_variables || exit_with_status 213 "Couldn't set environment variables."
   set_global_variables || exit_with_status 212 "Couldn't set global variables."
 
-  g_user_id="$(id -u)" || exit_with_status 211 "Couldn't get effective user ID."
-  g_example_installer_application_name="$(create_example_installer_application_name)" || exit_with_status 210 "Couldn't create example installer application name."
+  # ------------------------------------------------------------------
+  # Check external commands
+  # ------------------------------------------------------------------
+
+  local +x external_command
+
+  for external_command in "${EXTERNAL_COMMANDS[@]}"; do
+    if [[ ! -x "${external_command}" ]]; then
+      exit_with_status 211 "External command ${external_command} is missing or can not be executed."
+    fi
+  done
+
+  g_user_id="$(/usr/bin/id -u)" || exit_with_status 210 "Couldn't get effective user ID."
+  g_example_installer_application_name="$(create_example_installer_application_name)" || exit_with_status 209 "Couldn't create example installer application name."
 
   # ------------------------------------------------------------------
   # Check operating system requirements
@@ -2349,7 +2390,7 @@ main() {
   os_name="$(get_os_name)" || exit_with_status 251 "Couldn't get operating system name."
   is_macos "${os_name}" || exit_with_status 250 "This tool must be run on macOS."
 
-  macos_version_string="$(sw_vers -productVersion 2>/dev/null)" || exit_with_status 248 "Couldn't get macOS version."
+  macos_version_string="$(/usr/bin/sw_vers -productVersion 2>/dev/null)" || exit_with_status 248 "Couldn't get macOS version."
   macos_version_for_compare="$(create_macos_version_for_compare "${macos_version_string}")" || exit_with_status 247 "Invalid macOS version."
 
   if is_unsupported_macos_version_string "${macos_version_string}"; then
@@ -2522,7 +2563,7 @@ main() {
   installer_application_type="$(get_installer_application_type "${installer_application_path}")" || exit_with_status 241 "Couldn't get installer application type."
   iso_destination_image="${iso_directory_path}/${installer_application_display_name}.iso"
 
-  g_tmp_directory="$(mktemp -d -t "${SCRIPT_NAME}")" || exit_with_status 240 "Failed to create temporary directory."
+  g_tmp_directory="$(/usr/bin/mktemp -d -t "${SCRIPT_NAME}")" || exit_with_status 240 "Failed to create temporary directory."
   random_string="${g_tmp_directory##*.}"
 
   # ------------------------------------------------------------------
@@ -2586,7 +2627,7 @@ main() {
       fi
     fi
 
-    rm -rf "${iso_destination_image}" >/dev/null || exit_with_status 237 "Failed to delete the ${type_of_existing_destination} ${iso_destination_image}."
+    /bin/rm -rf "${iso_destination_image}" >/dev/null || exit_with_status 237 "Failed to delete the ${type_of_existing_destination} ${iso_destination_image}."
   fi
 
   # ------------------------------------------------------------------
@@ -2616,11 +2657,11 @@ main() {
   local +x tmp_directory_device_id
   local +x iso_directory_device_id
 
-  tmp_directory_volume_name="$(get_volume_name "${g_tmp_directory}")" || exit_with_status 208 "Couldn't get volume name for ${g_tmp_directory}."
-  iso_directory_volume_name="$(get_volume_name "${iso_directory_path}")" || exit_with_status 208 "Couldn't get volume name for ${iso_directory_path}."
+  tmp_directory_volume_name="$(get_volume_name "${g_tmp_directory}")" || exit_with_status 207 "Couldn't get volume name for ${g_tmp_directory}."
+  iso_directory_volume_name="$(get_volume_name "${iso_directory_path}")" || exit_with_status 207 "Couldn't get volume name for ${iso_directory_path}."
 
-  available_in_tmp_directory="$(get_available_disk_space "${g_tmp_directory}")" || exit_with_status 207 "Couldn't get available disk space on the filesystem of ${g_tmp_directory}."
-  available_in_iso_directory="$(get_available_disk_space "${iso_directory_path}")" || exit_with_status 207 "Couldn't get available disk space on the filesystem of ${iso_directory_path}."
+  available_in_tmp_directory="$(get_available_disk_space "${g_tmp_directory}")" || exit_with_status 206 "Couldn't get available disk space on the filesystem of ${g_tmp_directory}."
+  available_in_iso_directory="$(get_available_disk_space "${iso_directory_path}")" || exit_with_status 206 "Couldn't get available disk space on the filesystem of ${iso_directory_path}."
 
   ((required_for_modified_installer_application = $(get_disk_space_used_by_file_or_directory "${installer_application_path}")))
 
@@ -2632,7 +2673,7 @@ main() {
     1)
       ((required_in_tmp_directory = 0))
 
-      required_for_iso_image="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 206 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
+      required_for_iso_image="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 205 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
       ((required_in_iso_directory = required_for_iso_image))
       ;;
 
@@ -2641,11 +2682,11 @@ main() {
     # - OS X Yosemite 10.10
     # - OS X El Capitan 10.11
     2)
-      required_in_tmp_directory="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 206 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
+      required_in_tmp_directory="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 205 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
       ((required_in_tmp_directory *= 16 / 100))
       ((required_in_tmp_directory += 360000000))
 
-      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 205 "Couldn't get disk space used by ${installer_application_path}."
+      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 204 "Couldn't get disk space used by ${installer_application_path}."
       ((required_for_iso_image += 1460000000))
       ((required_in_iso_directory = required_for_iso_image))
       ;;
@@ -2666,19 +2707,19 @@ main() {
     # - macOS Sequoia 15
     3 | 4)
       offset_for_tmp_directory="$(get_offset_for_tmp_directory "${installer_application_display_name}")" || offset_for_tmp_directory=0
-      required_in_tmp_directory="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 205 "Couldn't get disk space used by ${installer_application_path}."
+      required_in_tmp_directory="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 204 "Couldn't get disk space used by ${installer_application_path}."
       ((required_in_tmp_directory += offset_for_tmp_directory * 1000000))
 
       offset_for_iso_image="$(get_offset_for_iso_directory_path "${installer_application_display_name}")" || offset_for_iso_image=0
-      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 205 "Couldn't get disk space used by ${installer_application_path}."
+      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 204 "Couldn't get disk space used by ${installer_application_path}."
       ((required_for_iso_image += offset_for_iso_image * 1000000))
       ((required_in_iso_directory = required_for_iso_image))
       ;;
 
   esac
 
-  tmp_directory_device_id="$(stat -L -f "%d" "${g_tmp_directory}")" || exit_with_status 239 "Couldn't get device ID for ${g_tmp_directory}."
-  iso_directory_device_id="$(stat -L -f "%d" "${iso_directory_path}")" || exit_with_status 239 "Couldn't get device ID for ${iso_directory_path}."
+  tmp_directory_device_id="$(/usr/bin/stat -L -f "%d" "${g_tmp_directory}")" || exit_with_status 239 "Couldn't get device ID for ${g_tmp_directory}."
+  iso_directory_device_id="$(/usr/bin/stat -L -f "%d" "${iso_directory_path}")" || exit_with_status 239 "Couldn't get device ID for ${iso_directory_path}."
 
   if [[ "${tmp_directory_device_id}" == "${iso_directory_device_id}" ]]; then
     if is_modification_of_installer_application_required; then
@@ -2690,7 +2731,7 @@ main() {
     ((missing_in_tmp_directory = required_in_tmp_directory - available_in_tmp_directory))
 
     if ((missing_in_tmp_directory > 0)); then
-      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 204 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
+      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 203 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
       exit_with_missing_disk_space "${tmp_directory_volume_name}" "temporary files and installer ISO image" "${human_readable_missing_disk_space}"
     fi
   else
@@ -2701,14 +2742,14 @@ main() {
     ((missing_in_tmp_directory = required_in_tmp_directory - available_in_tmp_directory))
 
     if ((missing_in_tmp_directory > 0)); then
-      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 204 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
+      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 203 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
       exit_with_missing_disk_space "${tmp_directory_volume_name}" "temporary files" "${human_readable_missing_disk_space}"
     fi
 
     ((missing_in_iso_directory = required_in_iso_directory - available_in_iso_directory))
 
     if ((missing_in_iso_directory > 0)); then
-      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_iso_directory}" "1" "100000")" || exit_with_status 204 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
+      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_iso_directory}" "1" "100000")" || exit_with_status 203 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
       exit_with_missing_disk_space "${iso_directory_volume_name}" "installer ISO image" "${human_readable_missing_disk_space}"
     fi
   fi
@@ -2723,8 +2764,8 @@ main() {
     modified_installer_application_path="${g_tmp_directory}/InstallerApplication/${installer_application_basename}"
 
     echo "Copying installer application..."
-    ditto --rsrc --extattr --acl "${original_installer_application_path}" "${modified_installer_application_path}" >/dev/null || exit_with_status 220 "Failed to copy installer application."
-    xattr -drs "com.apple.quarantine" "${modified_installer_application_path}" >/dev/null || exit_with_status 219 "Failed to remove extended attribute com.apple.quarantine."
+    /usr/bin/ditto --rsrc --extattr --acl "${original_installer_application_path}" "${modified_installer_application_path}" >/dev/null || exit_with_status 220 "Failed to copy installer application."
+    /usr/bin/xattr -drs "com.apple.quarantine" "${modified_installer_application_path}" >/dev/null || exit_with_status 219 "Failed to remove extended attribute com.apple.quarantine."
 
     if [[ "${g_patch_macos_sierra_installer_application}" == "true" ]]; then
       echo "Patching macOS Sierra installer application..."
@@ -2767,7 +2808,7 @@ main() {
     2)
       install_esd_image="${installer_application_path}/Contents/SharedSupport/InstallESD.dmg"
       g_install_esd_mountpoint="${g_tmp_directory}/InstallESD"
-      hdiutil attach "${install_esd_image}" -readonly -mountpoint "${g_install_esd_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 236 "Mount of outer dmg failed."
+      /usr/bin/hdiutil attach "${install_esd_image}" -readonly -mountpoint "${g_install_esd_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 236 "Mount of outer dmg failed."
 
       base_system_image="${g_install_esd_mountpoint}/BaseSystem.dmg"
       [[ -f "${base_system_image}" ]] || exit_with_status 235 "BaseSystem missing from the outer dmg, damaged installer image?"
@@ -2776,26 +2817,26 @@ main() {
       g_install_disk_mountpoint="${g_tmp_directory}/InstallDisk"
 
       echo "Creating disk image from installer image..."
-      hdiutil convert "${base_system_image}" -format UDSP -o "${install_disk_image}" -pmap >/dev/null || exit_with_status 234 "Failed to convert BaseSystem.dmg."
-      hdiutil resize -size 32g "${install_disk_image}" >/dev/null || exit_with_status 233 "Failed to resize disk image."
-      hdiutil attach "${install_disk_image}" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
+      /usr/bin/hdiutil convert "${base_system_image}" -format UDSP -o "${install_disk_image}" -pmap >/dev/null || exit_with_status 234 "Failed to convert BaseSystem.dmg."
+      /usr/bin/hdiutil resize -size 32g "${install_disk_image}" >/dev/null || exit_with_status 233 "Failed to resize disk image."
+      /usr/bin/hdiutil attach "${install_disk_image}" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
 
       echo "Copying installer files to disk image..."
-      rm -f "${g_install_disk_mountpoint}/System/Installation/Packages" >/dev/null || exit_with_status 231 "Failed to delete Packages symlink."
-      cp -R -p "${g_install_esd_mountpoint}/Packages" "${g_install_disk_mountpoint}/System/Installation/" >/dev/null || exit_with_status 230 "Failed to copy Packages directory."
+      /bin/rm -f "${g_install_disk_mountpoint}/System/Installation/Packages" >/dev/null || exit_with_status 231 "Failed to delete Packages symlink."
+      /bin/cp -R -p "${g_install_esd_mountpoint}/Packages" "${g_install_disk_mountpoint}/System/Installation/" >/dev/null || exit_with_status 230 "Failed to copy Packages directory."
 
       echo "Making disk image bootable..."
       core_services_directory="${g_install_disk_mountpoint}/System/Library/CoreServices"
-      bless --folder "${core_services_directory}" --file "${core_services_directory}/boot.efi" --label "${installer_application_display_name}" >/dev/null || exit_with_status 229 "The bless of the installer disk image failed."
+      /usr/sbin/bless --folder "${core_services_directory}" --file "${core_services_directory}/boot.efi" --label "${installer_application_display_name}" >/dev/null || exit_with_status 229 "The bless of the installer disk image failed."
 
       echo "Copying installer image..."
-      cp -p "${base_system_image}" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 228 "Failed to copy BaseSystem.dmg."
-      cp -p "${base_system_image%.dmg}.chunklist" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 227 "Failed to copy BaseSystem.chunklist."
+      /bin/cp -p "${base_system_image}" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 228 "Failed to copy BaseSystem.dmg."
+      /bin/cp -p "${base_system_image%.dmg}.chunklist" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 227 "Failed to copy BaseSystem.chunklist."
 
-      hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+      /usr/bin/hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
       unset g_install_esd_mountpoint || true
 
-      hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+      /usr/bin/hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
       unset g_install_disk_mountpoint || true
 
       iso_source_image="${install_disk_image}"
@@ -2819,23 +2860,23 @@ main() {
       echo "Creating empty disk image..."
       install_disk_image="${g_tmp_directory}/InstallDisk.sparseimage"
       install_disk_volname="InstallMedia.${random_string}"
-      hdiutil create -size 32g "${install_disk_image}" -type SPARSE -fs HFS+J -volname "${install_disk_volname}" >/dev/null || exit_with_status 225 "Failed to create disk image."
-      result="$(hdiutil attach "${install_disk_image}" -readwrite -nobrowse -noverify 2>/dev/null)" || exit_with_status 232 "The disk image did not mount."
+      /usr/bin/hdiutil create -size 32g "${install_disk_image}" -type SPARSE -fs HFS+J -volname "${install_disk_volname}" >/dev/null || exit_with_status 225 "Failed to create disk image."
+      result="$(/usr/bin/hdiutil attach "${install_disk_image}" -readwrite -nobrowse -noverify 2>/dev/null)" || exit_with_status 232 "The disk image did not mount."
       g_install_disk_device_node="${result%%[$' \t\n']*}"
 
       create_install_media "${installer_application_path}" "${install_disk_volname}" || exit_with_status 224 "Failed to convert disk image into bootable install media."
 
-      hdiutil detach "${g_install_disk_device_node}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+      /usr/bin/hdiutil detach "${g_install_disk_device_node}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
       unset g_install_disk_device_node || true
 
       if is_modification_of_installer_application_required; then
-        rm -rf "${modified_installer_application_path}" >/dev/null || true
+        /bin/rm -rf "${modified_installer_application_path}" >/dev/null || true
         g_install_disk_mountpoint="${g_tmp_directory}/InstallDisk"
-        hdiutil attach "${install_disk_image}" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
+        /usr/bin/hdiutil attach "${install_disk_image}" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
 
-        rsync -a "${original_installer_application_path}" "${g_install_disk_mountpoint}" || exit_with_status 216 "Failed to replace modified files with original ones."
+        /usr/bin/rsync -a "${original_installer_application_path}" "${g_install_disk_mountpoint}" || exit_with_status 216 "Failed to replace modified files with original ones."
 
-        hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+        /usr/bin/hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
         unset g_install_disk_mountpoint || true
       fi
 
