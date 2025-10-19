@@ -363,7 +363,7 @@ is_apple_silicon_mac() {
   exit_status=0
   result="$(/usr/sbin/sysctl -n "hw.optional.arm64" 2>/dev/null)" || exit_status="$?"
 
-  [[ ("${exit_status}" -eq 0) && ("${result}" == "1") ]]
+  [[ "${exit_status}" -eq 0 ]] && [[ "${result}" == "1" ]]
 }
 
 ##
@@ -1370,7 +1370,7 @@ is_createinstallmedia_required() {
 ## @retval     `false`  Otherwise.
 ##
 is_modification_of_installer_application_required() {
-  [[ ("${g_patch_macos_sierra_installer_application}" == "true") || ("${g_replace_code_signatures_in_installer_application}" == "true") ]]
+  [[ "${g_patch_macos_sierra_installer_application}" == "true" ]] || [[ "${g_replace_code_signatures_in_installer_application}" == "true" ]]
 }
 
 ##
@@ -2531,7 +2531,7 @@ main() {
   # Verify command line options
   # ------------------------------------------------------------------
 
-  if [[ "${option_applicationpath+set}" != "set" || "${option_isodirectory+set}" != "set" ]]; then
+  if [[ "${option_applicationpath+set}" != "set" ]] || [[ "${option_isodirectory+set}" != "set" ]]; then
     exit_with_status 255 "You must specify both the ISO directory and install application path."
   fi
 
