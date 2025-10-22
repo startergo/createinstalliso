@@ -2579,7 +2579,7 @@ main() {
   if is_apple_silicon_mac && is_createinstallmedia_required "${installer_application_type}"; then
     local +x mach_o_executable_architectures
 
-    mach_o_executable_architectures="$(get_mach_o_executable_architectures "${installer_application_path}/Contents/Resources/createinstallmedia")" || exit_with_status 209 "Couldn't get Mach-O executable architectures in createinstallmedia."
+    mach_o_executable_architectures="$(get_mach_o_executable_architectures "${installer_application_path}/Contents/Resources/createinstallmedia")" || exit_with_status 208 "Couldn't get Mach-O executable architectures in createinstallmedia."
 
     if ! is_mach_o_arm64_executable "${mach_o_executable_architectures}"; then
       # This flag may only be set to 'true' if the 'codesign' command
