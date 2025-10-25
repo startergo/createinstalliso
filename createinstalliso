@@ -150,6 +150,7 @@ declare +x g_patch_macos_sierra_installer_application
 declare +x g_replace_code_signatures_in_installer_application
 declare +x g_user_id
 declare +x g_example_installer_application_name
+declare +x g_shell_columns
 declare +x g_tmp_directory
 declare +x g_install_esd_mountpoint
 declare +x g_install_disk_mountpoint
@@ -2033,14 +2034,21 @@ parse_create_iso_image() {
   local +x is_line_mute="false"
   local +x is_mute="false"
   local +x is_progress_line="false"
-  local +x -r shell_columns="$(/usr/bin/tput cols 2>/dev/tty)"
-  local +x -r -i dot_count_max="$((shell_columns - 2))"
+  local +x shell_columns
+  local +x -i dot_count_max
   local +x -i dot_count=0
   local +x -i dot_increment
   local +x -i percent
   local +x -i percent_step
   local +x -i -r -a percent_steps=(20 40 60 80 100)
   local +x -i last_percent=0
+
+  # Get the number of columns for the current terminal or fallback to
+  # the previously determined number of columns. We use the same
+  # command as before for the global variable to minimize the risk of
+  # failure.
+  shell_columns="$(/usr/bin/tput cols 2>/dev/tty)" || shell_columns="${g_shell_columns}"
+  dot_count_max="$(max 1 "$((shell_columns - 2))")"
 
   while IFS= read -r -n1 -d "" char; do
     if [[ (("${is_line_mute}" == "true") && ("${char}" != $'\n')) || ("${is_mute}" == "true") ]]; then
@@ -2363,6 +2371,7 @@ main() {
 
   g_user_id="$(/usr/bin/id -u)" || exit_with_status 210 "Couldn't get effective user ID."
   g_example_installer_application_name="$(create_example_installer_application_name)" || exit_with_status 209 "Couldn't create example installer application name."
+  g_shell_columns="$(/usr/bin/tput cols 2>/dev/tty)" || exit_with_status 208 "Couldn't get number of columns for current terminal."
 
   # ------------------------------------------------------------------
   # Check operating system requirements
@@ -2579,7 +2588,7 @@ main() {
   if is_apple_silicon_mac && is_createinstallmedia_required "${installer_application_type}"; then
     local +x mach_o_executable_architectures
 
-    mach_o_executable_architectures="$(get_mach_o_executable_architectures "${installer_application_path}/Contents/Resources/createinstallmedia")" || exit_with_status 208 "Couldn't get Mach-O executable architectures in createinstallmedia."
+    mach_o_executable_architectures="$(get_mach_o_executable_architectures "${installer_application_path}/Contents/Resources/createinstallmedia")" || exit_with_status 207 "Couldn't get Mach-O executable architectures in createinstallmedia."
 
     if ! is_mach_o_arm64_executable "${mach_o_executable_architectures}"; then
       # This flag may only be set to 'true' if the 'codesign' command
@@ -2644,11 +2653,11 @@ main() {
   local +x tmp_directory_device_id
   local +x iso_directory_device_id
 
-  tmp_directory_volume_name="$(get_volume_name "${g_tmp_directory}")" || exit_with_status 207 "Couldn't get volume name for ${g_tmp_directory}."
-  iso_directory_volume_name="$(get_volume_name "${iso_directory_path}")" || exit_with_status 207 "Couldn't get volume name for ${iso_directory_path}."
+  tmp_directory_volume_name="$(get_volume_name "${g_tmp_directory}")" || exit_with_status 206 "Couldn't get volume name for ${g_tmp_directory}."
+  iso_directory_volume_name="$(get_volume_name "${iso_directory_path}")" || exit_with_status 206 "Couldn't get volume name for ${iso_directory_path}."
 
-  available_in_tmp_directory="$(get_available_disk_space "${g_tmp_directory}")" || exit_with_status 206 "Couldn't get available disk space on the filesystem of ${g_tmp_directory}."
-  available_in_iso_directory="$(get_available_disk_space "${iso_directory_path}")" || exit_with_status 206 "Couldn't get available disk space on the filesystem of ${iso_directory_path}."
+  available_in_tmp_directory="$(get_available_disk_space "${g_tmp_directory}")" || exit_with_status 205 "Couldn't get available disk space on the filesystem of ${g_tmp_directory}."
+  available_in_iso_directory="$(get_available_disk_space "${iso_directory_path}")" || exit_with_status 205 "Couldn't get available disk space on the filesystem of ${iso_directory_path}."
 
   ((required_for_modified_installer_application = $(get_disk_space_used_by_file_or_directory "${installer_application_path}")))
 
@@ -2660,7 +2669,7 @@ main() {
     1)
       ((required_in_tmp_directory = 0))
 
-      required_for_iso_image="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 205 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
+      required_for_iso_image="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 204 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
       ((required_in_iso_directory = required_for_iso_image))
       ;;
 
@@ -2669,11 +2678,11 @@ main() {
     # - OS X Yosemite 10.10
     # - OS X El Capitan 10.11
     2)
-      required_in_tmp_directory="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 205 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
+      required_in_tmp_directory="$(get_disk_image_total_non_empty_bytes "${installer_application_path}/Contents/SharedSupport/InstallESD.dmg")" || exit_with_status 204 "Couldn't get total non-empty bytes in disk image ${installer_application_path}/Contents/SharedSupport/InstallESD.dmg."
       ((required_in_tmp_directory *= 16 / 100))
       ((required_in_tmp_directory += 360000000))
 
-      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 204 "Couldn't get disk space used by ${installer_application_path}."
+      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 203 "Couldn't get disk space used by ${installer_application_path}."
       ((required_for_iso_image += 1460000000))
       ((required_in_iso_directory = required_for_iso_image))
       ;;
@@ -2694,11 +2703,11 @@ main() {
     # - macOS Sequoia 15
     3 | 4)
       offset_for_tmp_directory="$(get_offset_for_tmp_directory "${installer_application_display_name}")" || offset_for_tmp_directory=0
-      required_in_tmp_directory="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 204 "Couldn't get disk space used by ${installer_application_path}."
+      required_in_tmp_directory="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 203 "Couldn't get disk space used by ${installer_application_path}."
       ((required_in_tmp_directory += offset_for_tmp_directory * 1000000))
 
       offset_for_iso_image="$(get_offset_for_iso_directory_path "${installer_application_display_name}")" || offset_for_iso_image=0
-      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 204 "Couldn't get disk space used by ${installer_application_path}."
+      required_for_iso_image="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 203 "Couldn't get disk space used by ${installer_application_path}."
       ((required_for_iso_image += offset_for_iso_image * 1000000))
       ((required_in_iso_directory = required_for_iso_image))
       ;;
@@ -2718,7 +2727,7 @@ main() {
     ((missing_in_tmp_directory = required_in_tmp_directory - available_in_tmp_directory))
 
     if ((missing_in_tmp_directory > 0)); then
-      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 203 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
+      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 202 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
       exit_with_missing_disk_space "${tmp_directory_volume_name}" "temporary files and installer ISO image" "${human_readable_missing_disk_space}"
     fi
   else
@@ -2729,14 +2738,14 @@ main() {
     ((missing_in_tmp_directory = required_in_tmp_directory - available_in_tmp_directory))
 
     if ((missing_in_tmp_directory > 0)); then
-      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 203 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
+      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_tmp_directory}" "1" "100000")" || exit_with_status 202 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
       exit_with_missing_disk_space "${tmp_directory_volume_name}" "temporary files" "${human_readable_missing_disk_space}"
     fi
 
     ((missing_in_iso_directory = required_in_iso_directory - available_in_iso_directory))
 
     if ((missing_in_iso_directory > 0)); then
-      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_iso_directory}" "1" "100000")" || exit_with_status 203 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
+      human_readable_missing_disk_space="$(create_human_readable_byte_size "${missing_in_iso_directory}" "1" "100000")" || exit_with_status 202 "Couldn't create human-readable byte size for ${missing_in_tmp_directory}."
       exit_with_missing_disk_space "${iso_directory_volume_name}" "installer ISO image" "${human_readable_missing_disk_space}"
     fi
   fi

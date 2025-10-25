@@ -306,12 +306,13 @@ The table below lists all possible exit status and corresponding messages:
 | 211    | External command \[FILE\] is missing or can not be executed.                          |
 | 210    | Couldn't get effective user ID.                                                       |
 | 209    | Couldn't create example installer application name.                                   |
-| 208    | Couldn't get Mach-O executable architectures in createinstallmedia.                   |
-| 207    | Couldn't get volume name for \[DIRECTORY\].                                           |
-| 206    | Couldn't get available disk space on the filesystem of \[DIRECTORY\].                 |
-| 205    | Couldn't get total non-empty bytes in disk image \[FILE\].                            |
-| 204    | Couldn't get disk space used by \[DIRECTORY\].                                        |
-| 203    | Couldn't create human-readable byte size for \[INTEGER\].                             |
+| 208    | Couldn't get number of columns for current terminal.                                  |
+| 207    | Couldn't get Mach-O executable architectures in createinstallmedia.                   |
+| 206    | Couldn't get volume name for \[DIRECTORY\].                                           |
+| 205    | Couldn't get available disk space on the filesystem of \[DIRECTORY\].                 |
+| 204    | Couldn't get total non-empty bytes in disk image \[FILE\].                            |
+| 203    | Couldn't get disk space used by \[DIRECTORY\].                                        |
+| 202    | Couldn't create human-readable byte size for \[INTEGER\].                             |
 
 ## License
 
