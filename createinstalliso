@@ -204,6 +204,28 @@ get_basename() {
 }
 
 ##
+## @brief      Gets a path to a file or directory that can be safely
+##             used as an argument for a command. Therefore, the path
+##             must not start with a '-' because otherwise the path
+##             could be interpreted as an option for the command.
+##
+## @param      $1    A file or directory.
+##
+## @return     The argument-safe path to the file or directory.
+##
+get_argument_safe_path() {
+  local +x -r file_or_directory="$1"
+
+  # Prefix a path to a file or directory that starts with '-' with './'
+  if [[ "${file_or_directory::1}" == "-" ]]; then
+    echo "./${file_or_directory}"
+  else
+    echo "${file_or_directory}"
+  fi
+}
+
+
+##
 ## @brief      Gets a space-delimited list of the architectures of all
 ##             Mach-O executables in the specified file.
 ##
@@ -226,8 +248,8 @@ get_mach_o_executable_architectures() {
   [[ -n "${file}" ]] || return 1
   [[ -f "${file}" ]] || return 1
 
-  file_output_with_colon_separator="$(/usr/bin/file --separator ":" "${file}")" || return 1
-  file_output_with_space_separator="$(/usr/bin/file --separator " " "${file}")" || return 1
+  file_output_with_colon_separator="$(/usr/bin/file --separator ":" -- "${file}")" || return 1
+  file_output_with_space_separator="$(/usr/bin/file --separator " " -- "${file}")" || return 1
   output_length="${#file_output_with_colon_separator}"
 
   # Search for the first character that differs in both strings
@@ -274,7 +296,7 @@ get_available_disk_space() {
 
   [[ -n "${file_or_directory}" ]] || return 1
 
-  available_kilobytes="$(/bin/df -k "${file_or_directory}" | /usr/bin/awk 'FNR==2 { printf("%s\n", $4) }')" || return 1
+  available_kilobytes="$(/bin/df -k -- "${file_or_directory}" | /usr/bin/awk 'FNR==2 { printf("%s\n", $4) }')" || return 1
 
   echo "$((available_kilobytes * 1024))"
 }
@@ -292,7 +314,7 @@ get_disk_space_used_by_file_or_directory() {
 
   [[ -n "${file_or_directory}" ]] || return 1
 
-  used_kilobytes="$(/usr/bin/du -s -k "${file_or_directory}" | /usr/bin/awk '{ printf("%s\n", $1) }')" || return 1
+  used_kilobytes="$(/usr/bin/du -s -k -- "${file_or_directory}" | /usr/bin/awk '{ printf("%s\n", $1) }')" || return 1
 
   echo "$((used_kilobytes * 1024))"
 }
@@ -312,7 +334,7 @@ get_volume_name() {
 
   [[ -n "${file_or_directory}" ]] || return 1
 
-  volume_name="$(/bin/df "${file_or_directory}" | /usr/bin/awk 'FNR==2 { printf("%s\n", $9) }')" || return 1
+  volume_name="$(/bin/df -- "${file_or_directory}" | /usr/bin/awk 'FNR==2 { printf("%s\n", $9) }')" || return 1
 
   if [[ "${volume_name}" == "/" ]]; then
     volume_name="/Volumes/$(get_root_volume_name)" || return 1
@@ -500,13 +522,13 @@ get_absolute_logical_path() {
 
   if [[ -d "${file_or_directory}" ]]; then
     echo "$(
-      cd "${file_or_directory}" || return 1
+      cd -- "${file_or_directory}" || return 1
       pwd -L
     )" || return 1
   else
     if [[ "${file_or_directory}" == */* ]]; then
       echo "$(
-        cd "${file_or_directory%/*}" || return 1
+        cd -- "${file_or_directory%/*}" || return 1
         pwd -L
       )/${file_or_directory##*/}" || return 1
     else
@@ -558,7 +580,7 @@ get_trimmed_field_content() {
   local +x -r -i field_number="$2"
   local +x field
 
-  field="$(/usr/bin/cut -d# -f"${field_number}" <<<"${string}")" || return 1
+  field="$(/usr/bin/cut -d "#" -f "${field_number}" <<<"${string}")" || return 1
 
   trim "${field}"
 }
@@ -636,7 +658,7 @@ execute_plist_buddy_command() {
   [[ -n "${plist_command}" ]] || return 1
   [[ -n "${plist_file}" ]] || return 1
 
-  /usr/libexec/PlistBuddy -c "${plist_command}" "${plist_file}" 2>/dev/null
+  /usr/libexec/PlistBuddy -c "${plist_command}" "$(get_argument_safe_path "${plist_file}")" 2>/dev/null
 }
 
 ##
@@ -752,22 +774,22 @@ sigquit_handler() {
 cleanup() {
   if [[ -n "${g_tmp_directory-}" ]] && [[ -e "${g_tmp_directory}" ]]; then
     if [[ -n "${g_install_esd_mountpoint-}" ]] && [[ -e "${g_install_esd_mountpoint}" ]]; then
-      /usr/bin/hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null && unset g_install_esd_mountpoint || true
+      /usr/bin/hdiutil detach "$(get_argument_safe_path "${g_install_esd_mountpoint}")" -force >/dev/null && unset g_install_esd_mountpoint || true
     fi
 
     if [[ -n "${g_install_disk_mountpoint-}" ]] && [[ -e "${g_install_disk_mountpoint}" ]]; then
-      /usr/bin/hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null && unset g_install_disk_mountpoint || true
+      /usr/bin/hdiutil detach "$(get_argument_safe_path "${g_install_disk_mountpoint}")" -force >/dev/null && unset g_install_disk_mountpoint || true
     fi
 
     if [[ -n "${g_install_disk_device_node-}" ]] && [[ -e "${g_install_disk_device_node}" ]]; then
       /usr/bin/hdiutil detach "${g_install_disk_device_node}" -force >/dev/null && unset g_install_disk_device_node || true
     fi
 
-    /bin/rm -rf "${g_tmp_directory}" >/dev/null && unset g_tmp_directory || true
+    /bin/rm -rf -- "${g_tmp_directory}" >/dev/null && unset g_tmp_directory || true
   fi
 
   if [[ -n "${g_incomplete_iso_destination_image-}" ]] && [[ -e "${g_incomplete_iso_destination_image}" ]]; then
-    /bin/rm -rf "${g_incomplete_iso_destination_image}" >/dev/null && unset g_incomplete_iso_destination_image || true
+    /bin/rm -rf -- "${g_incomplete_iso_destination_image}" >/dev/null && unset g_incomplete_iso_destination_image || true
   fi
 
   return 0
@@ -807,7 +829,7 @@ kill_process_group_with_signal_name() {
 
   [[ -n "${signal_name}" ]] || return 1
 
-  pgid="$(/bin/ps -o pgid= "$$")" || return 1
+  pgid="$(/bin/ps -o pgid= -- "$$")" || return 1
   pgid="$(trim "${pgid}")" || return 1
 
   kill -s "${signal_name}" -- -"${pgid}"
@@ -1543,7 +1565,7 @@ get_disk_image_total_non_empty_bytes() {
   plist_file="${disk_image##*/}"
   plist_file="${g_tmp_directory}/${plist_file%.*}ImageInfo.plist"
 
-  /usr/bin/hdiutil imageinfo "${disk_image}" -plist >"${plist_file}" 2>/dev/null || return 1
+  /usr/bin/hdiutil imageinfo "$(get_argument_safe_path "${disk_image}")" -plist >"${plist_file}" 2>/dev/null || return 1
 
   get_plist_value ":Size Information:Total Non-Empty Bytes" "${plist_file}"
 }
@@ -1759,7 +1781,7 @@ create_install_media() {
   fi
 
   exit_status=0
-  { unused="$({ /usr/bin/script -k -q /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  { unused="$({ /usr/bin/script -k -q -- /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
 
   if has_script_createinstallmedia_been_canceled_by_sigint "${exit_status}"; then
     kill_process_group_with_signal_name "SIGINT" || true
@@ -1941,16 +1963,16 @@ replace_code_signatures() {
   # shellcheck disable=SC2034
   local +x file
 
-  /usr/bin/find "${installer_application_path}" -type f -print0 | while IFS= read -r -d "" file; do
+  /usr/bin/find "$(get_argument_safe_path "${installer_application_path}")" -type f -print0 | while IFS= read -r -d "" file; do
     local +x -i exit_status
 
     # Check if file has a code signature
     exit_status=0
-    /usr/bin/codesign -d "${file}" >/dev/null 2>&1 || exit_status="$?"
+    /usr/bin/codesign -d -- "${file}" >/dev/null 2>&1 || exit_status="$?"
 
     # Replace existing code signature with adhoc signature
     if [[ "${exit_status}" -eq 0 ]]; then
-      /usr/bin/codesign --sign - --force "${file}" >/dev/null 2>&1 || return 1
+      /usr/bin/codesign --sign - --force -- "${file}" >/dev/null 2>&1 || return 1
     fi
   done
 }
@@ -1977,7 +1999,7 @@ create_iso_image() {
   [[ -e "${iso_source_image}" ]] || return 1
 
   exit_status=0
-  { unused="$({ /usr/bin/script -k -q "${typescript_file}" /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "${iso_source_image}" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  { unused="$({ /usr/bin/script -k -q -- "${typescript_file}" /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
 
   if has_script_hdiutil_makehybrid_been_canceled_by_sigint "${typescript_file}"; then
     kill_process_group_with_signal_name "SIGINT" || true
@@ -2151,7 +2173,7 @@ has_script_hdiutil_makehybrid_been_canceled_by_sigint() {
 
   [[ -n "${typescript_file}" ]] || return 1
 
-  /usr/bin/grep --fixed-strings "canceling..." "${typescript_file}" >/dev/null
+  /usr/bin/grep --fixed-strings "canceling..." -- "${typescript_file}" >/dev/null
 }
 
 ##
@@ -2623,7 +2645,7 @@ main() {
       fi
     fi
 
-    /bin/rm -rf "${iso_destination_image}" >/dev/null || exit_with_status 237 "Failed to delete the ${type_of_existing_destination} ${iso_destination_image}."
+    /bin/rm -rf -- "${iso_destination_image}" >/dev/null || exit_with_status 237 "Failed to delete the ${type_of_existing_destination} ${iso_destination_image}."
   fi
 
   # ------------------------------------------------------------------
@@ -2714,8 +2736,8 @@ main() {
 
   esac
 
-  tmp_directory_device_id="$(/usr/bin/stat -L -f "%d" "${g_tmp_directory}")" || exit_with_status 239 "Couldn't get device ID for ${g_tmp_directory}."
-  iso_directory_device_id="$(/usr/bin/stat -L -f "%d" "${iso_directory_path}")" || exit_with_status 239 "Couldn't get device ID for ${iso_directory_path}."
+  tmp_directory_device_id="$(/usr/bin/stat -L -f "%d" -- "${g_tmp_directory}")" || exit_with_status 239 "Couldn't get device ID for ${g_tmp_directory}."
+  iso_directory_device_id="$(/usr/bin/stat -L -f "%d" -- "${iso_directory_path}")" || exit_with_status 239 "Couldn't get device ID for ${iso_directory_path}."
 
   if [[ "${tmp_directory_device_id}" == "${iso_directory_device_id}" ]]; then
     if is_modification_of_installer_application_required; then
@@ -2760,8 +2782,8 @@ main() {
     modified_installer_application_path="${g_tmp_directory}/InstallerApplication/${installer_application_basename}"
 
     echo "Copying installer application..."
-    /usr/bin/ditto --rsrc --extattr --acl "${original_installer_application_path}" "${modified_installer_application_path}" >/dev/null || exit_with_status 220 "Failed to copy installer application."
-    /usr/bin/xattr -drs "com.apple.quarantine" "${modified_installer_application_path}" >/dev/null || exit_with_status 219 "Failed to remove extended attribute com.apple.quarantine."
+    /usr/bin/ditto --rsrc --extattr --acl -- "${original_installer_application_path}" "${modified_installer_application_path}" >/dev/null || exit_with_status 220 "Failed to copy installer application."
+    /usr/bin/xattr -drs "com.apple.quarantine" "$(get_argument_safe_path "${modified_installer_application_path}")" >/dev/null || exit_with_status 219 "Failed to remove extended attribute com.apple.quarantine."
 
     if [[ "${g_patch_macos_sierra_installer_application}" == "true" ]]; then
       echo "Patching macOS Sierra installer application..."
@@ -2804,7 +2826,7 @@ main() {
     2)
       install_esd_image="${installer_application_path}/Contents/SharedSupport/InstallESD.dmg"
       g_install_esd_mountpoint="${g_tmp_directory}/InstallESD"
-      /usr/bin/hdiutil attach "${install_esd_image}" -readonly -mountpoint "${g_install_esd_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 236 "Mount of outer dmg failed."
+      /usr/bin/hdiutil attach "$(get_argument_safe_path "${install_esd_image}")" -readonly -mountpoint "${g_install_esd_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 236 "Mount of outer dmg failed."
 
       base_system_image="${g_install_esd_mountpoint}/BaseSystem.dmg"
       [[ -f "${base_system_image}" ]] || exit_with_status 235 "BaseSystem missing from the outer dmg, damaged installer image?"
@@ -2813,26 +2835,26 @@ main() {
       g_install_disk_mountpoint="${g_tmp_directory}/InstallDisk"
 
       echo "Creating disk image from installer image..."
-      /usr/bin/hdiutil convert "${base_system_image}" -format UDSP -o "${install_disk_image}" -pmap >/dev/null || exit_with_status 234 "Failed to convert BaseSystem.dmg."
-      /usr/bin/hdiutil resize -size 32g "${install_disk_image}" >/dev/null || exit_with_status 233 "Failed to resize disk image."
-      /usr/bin/hdiutil attach "${install_disk_image}" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
+      /usr/bin/hdiutil convert "$(get_argument_safe_path "${base_system_image}")" -format UDSP -o "${install_disk_image}" -pmap >/dev/null || exit_with_status 234 "Failed to convert BaseSystem.dmg."
+      /usr/bin/hdiutil resize -size 32g "$(get_argument_safe_path "${install_disk_image}")" >/dev/null || exit_with_status 233 "Failed to resize disk image."
+      /usr/bin/hdiutil attach "$(get_argument_safe_path "${install_disk_image}")" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
 
       echo "Copying installer files to disk image..."
-      /bin/rm -f "${g_install_disk_mountpoint}/System/Installation/Packages" >/dev/null || exit_with_status 231 "Failed to delete Packages symlink."
-      /bin/cp -R -p "${g_install_esd_mountpoint}/Packages" "${g_install_disk_mountpoint}/System/Installation/" >/dev/null || exit_with_status 230 "Failed to copy Packages directory."
+      /bin/rm -f -- "${g_install_disk_mountpoint}/System/Installation/Packages" >/dev/null || exit_with_status 231 "Failed to delete Packages symlink."
+      /bin/cp -R -p -- "${g_install_esd_mountpoint}/Packages" "${g_install_disk_mountpoint}/System/Installation/" >/dev/null || exit_with_status 230 "Failed to copy Packages directory."
 
       echo "Making disk image bootable..."
       core_services_directory="${g_install_disk_mountpoint}/System/Library/CoreServices"
       /usr/sbin/bless --folder "${core_services_directory}" --file "${core_services_directory}/boot.efi" --label "${installer_application_display_name}" >/dev/null || exit_with_status 229 "The bless of the installer disk image failed."
 
       echo "Copying installer image..."
-      /bin/cp -p "${base_system_image}" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 228 "Failed to copy BaseSystem.dmg."
-      /bin/cp -p "${base_system_image%.dmg}.chunklist" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 227 "Failed to copy BaseSystem.chunklist."
+      /bin/cp -p -- "${base_system_image}" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 228 "Failed to copy BaseSystem.dmg."
+      /bin/cp -p -- "${base_system_image%.dmg}.chunklist" "${g_install_disk_mountpoint}/" >/dev/null || exit_with_status 227 "Failed to copy BaseSystem.chunklist."
 
-      /usr/bin/hdiutil detach "${g_install_esd_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+      /usr/bin/hdiutil detach "$(get_argument_safe_path "${g_install_esd_mountpoint}")" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
       unset g_install_esd_mountpoint || true
 
-      /usr/bin/hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+      /usr/bin/hdiutil detach "$(get_argument_safe_path "${g_install_disk_mountpoint}")" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
       unset g_install_disk_mountpoint || true
 
       iso_source_image="${install_disk_image}"
@@ -2856,8 +2878,8 @@ main() {
       echo "Creating empty disk image..."
       install_disk_image="${g_tmp_directory}/InstallDisk.sparseimage"
       install_disk_volname="InstallMedia.${random_string}"
-      /usr/bin/hdiutil create -size 32g "${install_disk_image}" -type SPARSE -fs HFS+J -volname "${install_disk_volname}" >/dev/null || exit_with_status 225 "Failed to create disk image."
-      result="$(/usr/bin/hdiutil attach "${install_disk_image}" -readwrite -nobrowse -noverify 2>/dev/null)" || exit_with_status 232 "The disk image did not mount."
+      /usr/bin/hdiutil create -size 32g "$(get_argument_safe_path "${install_disk_image}")" -type SPARSE -fs HFS+J -volname "${install_disk_volname}" >/dev/null || exit_with_status 225 "Failed to create disk image."
+      result="$(/usr/bin/hdiutil attach "$(get_argument_safe_path "${install_disk_image}")" -readwrite -nobrowse -noverify 2>/dev/null)" || exit_with_status 232 "The disk image did not mount."
       g_install_disk_device_node="${result%%[$' \t\n']*}"
 
       create_install_media "${installer_application_path}" "${install_disk_volname}" || exit_with_status 224 "Failed to convert disk image into bootable install media."
@@ -2866,13 +2888,13 @@ main() {
       unset g_install_disk_device_node || true
 
       if is_modification_of_installer_application_required; then
-        /bin/rm -rf "${modified_installer_application_path}" >/dev/null || true
+        /bin/rm -rf -- "${modified_installer_application_path}" >/dev/null || true
         g_install_disk_mountpoint="${g_tmp_directory}/InstallDisk"
-        /usr/bin/hdiutil attach "${install_disk_image}" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
+        /usr/bin/hdiutil attach "$(get_argument_safe_path "${install_disk_image}")" -readwrite -mountpoint "${g_install_disk_mountpoint}" -nobrowse -noverify >/dev/null || exit_with_status 232 "The disk image did not mount."
 
-        /usr/bin/rsync -a "${original_installer_application_path}" "${g_install_disk_mountpoint}" || exit_with_status 216 "Failed to replace modified files with original ones."
+        /usr/bin/rsync -a -- "${original_installer_application_path}" "${g_install_disk_mountpoint}" || exit_with_status 216 "Failed to replace modified files with original ones."
 
-        /usr/bin/hdiutil detach "${g_install_disk_mountpoint}" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
+        /usr/bin/hdiutil detach "$(get_argument_safe_path "${g_install_disk_mountpoint}")" -force >/dev/null || exit_with_status 226 "Couldn't unmount disk image."
         unset g_install_disk_mountpoint || true
       fi
 
