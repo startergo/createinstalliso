@@ -1125,22 +1125,6 @@ is_supported_macos_version_string() {
 }
 
 ##
-## @brief      Determines whether an ISO directory path is valid.
-##
-## @param      $1       An ISO directory to be checked.
-##
-## @retval     `true`   The ISO directory path is valid.
-## @retval     `false`  Otherwise.
-##
-is_valid_iso_directory_path() {
-  local +x -r iso_directory_path="$1"
-
-  [[ -n "${iso_directory_path}" ]] || return 1
-
-  [[ -d "${iso_directory_path}" ]]
-}
-
-##
 ## @brief      Determines whether an installer application path is
 ##             valid.
 ##
