@@ -228,7 +228,6 @@ get_argument_safe_path() {
   fi
 }
 
-
 ##
 ## @brief      Gets a space-delimited list of the architectures of all
 ##             Mach-O executables in the specified file.
