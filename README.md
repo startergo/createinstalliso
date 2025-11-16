@@ -237,6 +237,7 @@ The installer application types are:
 - `/usr/bin/sw_vers`
 - `/usr/bin/tput`
 - `/usr/bin/uname`
+- `/usr/bin/xargs`
 - `/usr/bin/xattr`
 - `/usr/libexec/PlistBuddy`
 - `/usr/sbin/bless`
