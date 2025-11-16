@@ -67,12 +67,13 @@ The table below shows:
 | macOS Sierra          | 10.12   |             Yes              | 10.7 - 13             |
 | macOS High Sierra     | 10.13   |             Yes              | 10.7 - 15             |
 | macOS Mojave          | 10.14   |             Yes              | 10.7 - 15             |
-| macOS Catalina        | 10.15   |             Yes              | 10.7 - 15             |
-| macOS Big Sur         | 11      |             Yes              | 10.7 - 15             |
-| macOS Monterey        | 12      |             Yes              | 10.7 - 15             |
-| macOS Ventura         | 13      |             Yes              | 10.7 - 15             |
-| macOS Sonoma          | 14      |             Yes              | 10.7 - 15             |
-| macOS Sequoia         | 15      |             Yes              | 10.7 - 15             |
+| macOS Catalina        | 10.15   |             Yes              | 10.7 - 26             |
+| macOS Big Sur         | 11      |             Yes              | 10.7 - 26             |
+| macOS Monterey        | 12      |             Yes              | 10.7 - 26             |
+| macOS Ventura         | 13      |             Yes              | 10.7 - 26             |
+| macOS Sonoma          | 14      |             Yes              | 10.7 - 26             |
+| macOS Sequoia         | 15      |             Yes              | 10.7 - 26             |
+| macOS Tahoe           | 26      |             Yes              | 10.7 - 26             |
 
 ### Installer version
 
@@ -103,6 +104,7 @@ The table below shows:
 | macOS Ventura         | 13      |     10.11 or later     |
 | macOS Sonoma          | 14      |     10.13 or later     |
 | macOS Sequoia         | 15      |     10.13 or later     |
+| macOS Tahoe           | 26      |     10.15 or later     |
 
 ## Installation
 
@@ -211,6 +213,7 @@ The installer application types are:
 | macOS Ventura      | 13      |  4   |
 | macOS Sonoma       | 14      |  4   |
 | macOS Sequoia      | 15      |  4   |
+| macOS Tahoe        | 26      |  4   |
 
 ### Required external commands
 

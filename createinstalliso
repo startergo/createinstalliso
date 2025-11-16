@@ -62,6 +62,7 @@ declare +x -r -a SUPPORTED_MACOS_VERSION_STRINGS_REGEX=(
   '^13\.[[:digit:]]+(\.[[:digit:]]+)?$' # macOS Ventura         13
   '^14\.[[:digit:]]+(\.[[:digit:]]+)?$' # macOS Sonoma          14
   '^15\.[[:digit:]]+(\.[[:digit:]]+)?$' # macOS Sequoia         15
+  '^26\.[[:digit:]]+(\.[[:digit:]]+)?$' # macOS Tahoe           26
 )
 
 # List of all supported installer applications and their disk space
@@ -85,6 +86,7 @@ declare +x -r -a SUPPORTED_INSTALLER_APPLICATION_DISPLAY_NAMES_AND_OFFSETS=(
   'Install macOS Ventura      # 20946 # 13310' # 13
   'Install macOS Sonoma       # 22824 # 14431' # 14
   'Install macOS Sequoia      # 24313 # 15346' # 15
+  'Install macOS Tahoe        # 26954 # 16921' # 26
 )
 
 # List of all known macOS version names and their corresponding version
@@ -111,6 +113,7 @@ declare +x -r -a KNOWN_MACOS_NAMES_AND_VERSION_STRINGS_REGEX=(
   '^13\.[[:digit:]]+(\.[[:digit:]]+)?$ # macOS Ventura'         # 13
   '^14\.[[:digit:]]+(\.[[:digit:]]+)?$ # macOS Sonoma'          # 14
   '^15\.[[:digit:]]+(\.[[:digit:]]+)?$ # macOS Sequoia'         # 15
+  '^26\.[[:digit:]]+(\.[[:digit:]]+)?$ # macOS Tahoe'           # 26
 )
 
 declare +x -r -a EXTERNAL_COMMANDS=(
@@ -1257,6 +1260,7 @@ is_valid_installer_application_path() {
     # - macOS Ventura 13
     # - macOS Sonoma 14
     # - macOS Sequoia 15
+    # - macOS Tahoe 26
     4)
       # Apple's command 'createinstallmedia' is required because
       # it will be used to create the installer disk image.
@@ -1429,6 +1433,7 @@ get_installer_application_display_name() {
 ##               - macOS Ventura 13
 ##               - macOS Sonoma 14
 ##               - macOS Sequoia 15
+##               - macOS Tahoe 26
 ##
 ## @param      $1    The path to an installer application.
 ##
@@ -1518,6 +1523,12 @@ get_minimum_macos_version_string() {
     # - macOS Sequoia 15
     "Install macOS Sonoma" | "Install macOS Sequoia")
       minimum_macos_version_string="10.13"
+      ;;
+
+    # Installer application for:
+    # - macOS Tahoe 26
+    "Install macOS Tahoe")
+      minimum_macos_version_string="10.15"
       ;;
 
     # Unknown installer application
@@ -2708,6 +2719,7 @@ main() {
     # - macOS Ventura 13
     # - macOS Sonoma 14
     # - macOS Sequoia 15
+    # - macOS Tahoe 26
     3 | 4)
       offset_for_tmp_directory="$(get_offset_for_tmp_directory "${installer_application_display_name}")" || offset_for_tmp_directory=0
       required_in_tmp_directory="$(get_disk_space_used_by_file_or_directory "${installer_application_path}")" || exit_with_status 203 "Couldn't get disk space used by ${installer_application_path}."
@@ -2859,6 +2871,7 @@ main() {
     # - macOS Ventura 13
     # - macOS Sonoma 14
     # - macOS Sequoia 15
+    # - macOS Tahoe 26
     3 | 4)
       echo "Creating empty disk image..."
       install_disk_image="${g_tmp_directory}/InstallDisk.sparseimage"
