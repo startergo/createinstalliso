@@ -769,7 +769,7 @@ sigquit_handler() {
 }
 
 ##
-## @brief      Performs the required cleanup of allocated ressources.
+## @brief      Performs the required cleanup of allocated resources.
 ##
 cleanup() {
   if [[ -n "${g_tmp_directory-}" ]] && [[ -e "${g_tmp_directory}" ]]; then
@@ -1405,7 +1405,7 @@ get_installer_application_display_name() {
 }
 
 ##
-## @brief      Gets the type of an installer application. The type is
+## @brief      Gets the type of installer application. The type is
 ##             determined by checking the presence of some files that
 ##             are specific to the different installer types.
 ##
@@ -1541,11 +1541,11 @@ get_minimum_macos_version_string() {
 }
 
 ##
-## @brief      Gets the total non empty bytes of a disk image.
+## @brief      Gets the total non-empty bytes of a disk image.
 ##
 ## @param      $1    The disk image.
 ##
-## @return     The total number of non empty bytes.
+## @return     The total number of non-empty bytes.
 ##
 get_disk_image_total_non_empty_bytes() {
   local +x -r disk_image="$1"
