@@ -533,7 +533,7 @@ func showHelp() {
     4. Enable any special options if needed:
        • Patch Sierra: Fix for defective macOS Sierra 12.6.06 installer
        • Replace Signatures: Re-sign installer components
-    5. Click "Create ISO Image" to start the process
+    5. Press 6 or select "Create ISO Image" to start the process
     
     Requirements:
     • Valid macOS installer application
