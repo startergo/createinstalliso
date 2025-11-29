@@ -22,7 +22,7 @@
 # ======================================================================
 
 declare +x -r SCRIPT_NAME="createinstalliso"
-declare +x -r SCRIPT_VERSION="develop"
+declare +x -r SCRIPT_VERSION="1.2.0"
 declare +x -r MINIMUM_REQUIRED_MACOS_VERSION_STRING="10.6"
 declare +x -r -i ROOT_USER_ID=0
 declare +x -r -i SIGQUIT_NUMBER=3
