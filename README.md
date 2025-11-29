@@ -1,6 +1,7 @@
 # createinstalliso
 
-Creates a bootable ISO image from a macOS installer application. This image can then be used to install macOS on a physical or virtual machine.
+Creates a bootable ISO image from a macOS installer application. This image can then be used to install macOS on a
+physical or virtual machine.
 
 ## Table of Contents
 
@@ -9,27 +10,35 @@ Creates a bootable ISO image from a macOS installer application. This image can 
 - [Compatibility](#user-content-compatibility)
 - [Installation](#user-content-installation)
 - [Usage](#user-content-usage)
-  - [Command line arguments](#user-content-command-line-arguments)
-  - [Example](#user-content-example)
+    - [Command line arguments](#user-content-command-line-arguments)
+    - [Example](#user-content-example)
 - [Troubleshooting](#user-content-troubleshooting)
     - [Alert during macOS installation](#user-content-alert-during-macos-installation)
 - [References](#user-content-references)
-  - [Installer application types](#user-content-installer-application-types)
-  -[Required external commands](#user-content-required-external-commands)
-  - [Exit status and messages](#user-content-exit-status-and-messages)
+    - [Installer application types](#user-content-installer-application-types)
+    - [Required external commands](#user-content-required-external-commands)
+    - [Exit status and messages](#user-content-exit-status-and-messages)
 - [License](#user-content-license)
 
 ## Introduction
 
-If you have ever needed to install macOS on a new computer, you have probably discovered the ability to create a bootable USB flash drive or other volume by using the `createinstallmedia` command included in the downloaded macOS installer: [Create a bootable installer](https://support.apple.com/en-us/101578).
+If you have ever needed to install macOS on a new computer, you have probably discovered the ability to create a
+bootable USB flash drive or other volume by using the `createinstallmedia` command included in the downloaded macOS
+installer: [Create a bootable installer](https://support.apple.com/en-us/101578).
 
-In case you need a **bootable ISO image** instead, you can find a lot of shell scripts in forums that create such an ISO image for certain macOS versions. However, they are often only written for a single macOS version and cannot adapt to the specific macOS version contained in the installer.
+In case you need a **bootable ISO image** instead, you can find a lot of shell scripts in forums that create such an ISO
+image for certain macOS versions. However, they are often only written for a single macOS version and cannot adapt to
+the specific macOS version contained in the installer.
 
-The purpose of this program **createinstalliso** is to create a bootable ISO image from a downloaded full macOS installer. In addition, the program should:
+The purpose of this program **createinstalliso** is to create a bootable ISO image from a downloaded full macOS
+installer. In addition, the program should:
 
-* Automatically adapt the strategy used to create the ISO image to the installer application type, thereby supporting a wide range of macOS versions (see: [Compatibility](#user-content-compatibility)).
-* Look and feel like Apple's `createinstallmedia` command (e.g. handling of command line arguments, wording for error and progress messages, status codes used when exiting).
-* Behaving like a standard command line program (e.g. Ctrl-C interruptibility, proper cleanup of resources before exiting), even though it is a Bash script.
+* Automatically adapt the strategy used to create the ISO image to the installer application type, thereby supporting a
+  wide range of macOS versions (see: [Compatibility](#user-content-compatibility)).
+* Look and feel like Apple's `createinstallmedia` command (e.g. handling of command line arguments, wording for error
+  and progress messages, status codes used when exiting).
+* Behaving like a standard command line program (e.g. Ctrl-C interruptibility, proper cleanup of resources before
+  exiting), even though it is a Bash script.
 
 ## Requirements
 
@@ -67,12 +76,13 @@ The table below shows:
 | macOS Sierra          | 10.12   |             Yes              | 10.7 - 13             |
 | macOS High Sierra     | 10.13   |             Yes              | 10.7 - 15             |
 | macOS Mojave          | 10.14   |             Yes              | 10.7 - 15             |
-| macOS Catalina        | 10.15   |             Yes              | 10.7 - 15             |
-| macOS Big Sur         | 11      |             Yes              | 10.7 - 15             |
-| macOS Monterey        | 12      |             Yes              | 10.7 - 15             |
-| macOS Ventura         | 13      |             Yes              | 10.7 - 15             |
-| macOS Sonoma          | 14      |             Yes              | 10.7 - 15             |
-| macOS Sequoia         | 15      |             Yes              | 10.7 - 15             |
+| macOS Catalina        | 10.15   |             Yes              | 10.7 - 26             |
+| macOS Big Sur         | 11      |             Yes              | 10.7 - 26             |
+| macOS Monterey        | 12      |             Yes              | 10.7 - 26             |
+| macOS Ventura         | 13      |             Yes              | 10.7 - 26             |
+| macOS Sonoma          | 14      |             Yes              | 10.7 - 26             |
+| macOS Sequoia         | 15      |             Yes              | 10.7 - 26             |
+| macOS Tahoe           | 26      |             Yes              | 10.7 - 26             |
 
 ### Installer version
 
@@ -103,10 +113,12 @@ The table below shows:
 | macOS Ventura         | 13      |     10.11 or later     |
 | macOS Sonoma          | 14      |     10.13 or later     |
 | macOS Sequoia         | 15      |     10.13 or later     |
+| macOS Tahoe           | 26      |     10.15 or later     |
 
 ## Installation
 
-Open Terminal, which is in the Utilities folder of your Applications folder, and type or paste the following commands into Terminal:
+Open Terminal, which is in the Utilities folder of your Applications folder, and type or paste the following commands
+into Terminal:
 
 * Download the **createinstalliso** file.
 
@@ -120,7 +132,8 @@ Open Terminal, which is in the Utilities folder of your Applications folder, and
     chmod +x createinstalliso
     ```
 
-* A good practice is to keep your shell scripts in the `bin` folder in your home directory. If it does not already exist, create it and move the script to this folder.
+* A good practice is to keep your shell scripts in the `bin` folder in your home directory. If it does not already
+  exist, create it and move the script to this folder.
 
     ```
     mkdir -p ~/bin
@@ -137,7 +150,8 @@ Open Terminal, which is in the Utilities folder of your Applications folder, and
 
 ## Usage
 
-Just like Apple's `createinstallmedia` command **createinstalliso** must be run as root user. Depending on where you saved the script, the command will look like:
+Just like Apple's `createinstallmedia` command **createinstalliso** must be run as root user. Depending on where you
+saved the script, the command will look like:
 
 ```
 sudo ~/bin/createinstalliso --isodirectory <path to ISO directory> --applicationpath <path to OS installer application> [--nointeraction]
@@ -147,12 +161,18 @@ sudo ~/bin/createinstalliso --isodirectory <path to ISO directory> --application
 
 The command **createinstalliso** requires the following two command line arguments:
 
-* `--isodirectory` (or `-i`) must be followed by a path to a directory where the installer ISO image file will be created.
-* `--applicationpath` (or `-a`) must be followed by a path to a copy of the OS installer application to create the bootable ISO image from.
+* `--isodirectory` (or `-i`) must be followed by a path to a directory where the installer ISO image file will be
+  created.
+* `--applicationpath` (or `-a`) must be followed by a path to a copy of the OS installer application to create the
+  bootable ISO image from.
 
-The name of the ISO image to be created is made up of the name of the installer and has the extension `iso` (e.g. `Install macOS Catalina.iso`). If such a file already exists in the specified destination directory, you will be prompted for confirmation before this file is overwritten. If you do not care about overwriting an existing file and do not want to be prompted, you can add the command line option `--nointeraction`.
+The name of the ISO image to be created is made up of the name of the installer and has the extension `iso` (e.g.
+`Install macOS Catalina.iso`). If such a file already exists in the specified destination directory, you will be
+prompted for confirmation before this file is overwritten. If you do not care about overwriting an existing file and do
+not want to be prompted, you can add the command line option `--nointeraction`.
 
-If you want to suppress user interactions when running the command and always allow the required actions, you can add the option:
+If you want to suppress user interactions when running the command and always allow the required actions, you can add
+the option:
 
 * `--nointeraction` (or `-n`) causes an existing ISO image file to **always** be overwritten.
 
@@ -161,7 +181,8 @@ If you want to suppress user interactions when running the command and always al
 The following example show the steps required to create an ISO image from a macOS Catalina installer:
 
 * Open Terminal, which is in the Utilities folder of your Applications folder.
-* Type or paste the following command into Terminal, then press Return to enter the command. This assumes that the installer is still in your Applications folder, and you have moved **createinstalliso** to the `~/bin` folder.
+* Type or paste the following command into Terminal, then press Return to enter the command. This assumes that the
+  installer is still in your Applications folder, and you have moved **createinstalliso** to the `~/bin` folder.
 
     ```
     sudo ~/bin/createinstalliso --isodirectory ~/Desktop/ --applicationpath /Applications/Install\ macOS\ Catalina.app/
@@ -169,18 +190,25 @@ The following example show the steps required to create an ISO image from a macO
 
 * When prompted, type your administrator password. Terminal doesn't show any characters as you type. Then press Return.
 * Terminal shows the progress as the bootable ISO image is created.
-* When Terminal says that it's done, you will find the bootable ISO image `Install macOS Catalina.iso` in the folder you specified (here: `~/Desktop`).
+* When Terminal says that it's done, you will find the bootable ISO image `Install macOS Catalina.iso` in the folder you
+  specified (here: `~/Desktop`).
 * You can now quit Terminal.
 
 ## Troubleshooting
 
 ### Alert during macOS installation
 
-If you try to install macOS using the ISO image you created, you may see an alert that says the application can't be verified and may have been corrupted or tampered with during downloading. Or it says that the package was signed with a certificate that has expired and may not be authentic (see: [If an installer says it can't be verified or was signed with a certificate that has expired](https://support.apple.com/en-us/100622)).
+If you try to install macOS using the ISO image you created, you may see an alert that says the application can't be
+verified and may have been corrupted or tampered with during downloading. Or it says that the package was signed with a
+certificate that has expired and may not be authentic (
+see: [If an installer says it can't be verified or was signed with a certificate that has expired](https://support.apple.com/en-us/100622)).
 
-The most likely reason for this message is that the installer was signed with a certificate that expired on October 24, 2019. You must therefore either get a *new* installer signed with a currently valid certificate or temporarily set the system date to a date in the past when the certificate was still valid.
+The most likely reason for this message is that the installer was signed with a certificate that expired on October
+24th, 2019. You must therefore either get a *new* installer signed with a currently valid certificate or temporarily set
+the system date to a date in the past when the certificate was still valid.
 
-To manually set the system date to a value in the past, perform the following steps after the above warning is displayed during the macOS installation:
+To manually set the system date to a value in the past, perform the following steps after the above warning is displayed
+during the macOS installation:
 
 * Close the alert.
 * Open Terminal from the Utilities menu.
@@ -191,7 +219,9 @@ To manually set the system date to a value in the past, perform the following st
 
 ### Installer application types
 
-Apple has used different internal structures for its macOS installers over time. Therefore, **createinstalliso** examines the internal structure of the installer and determines which 'type' it is. Based on this 'type', the necessary steps to create a bootable ISO image are performed.
+Apple has used different internal structures for its macOS installers over time. Therefore, **createinstalliso**
+examines the internal structure of the installer and determines which 'type' it is. Based on this 'type', the necessary
+steps to create a bootable ISO image are performed.
 
 The installer application types are:
 
@@ -211,42 +241,47 @@ The installer application types are:
 | macOS Ventura      | 13      |  4   |
 | macOS Sonoma       | 14      |  4   |
 | macOS Sequoia      | 15      |  4   |
+| macOS Tahoe        | 26      |  4   |
 
 ### Required external commands
 
 **createinstalliso** uses a number of external commands, which must be available on your system:
 
-- `awk`
-- `bless`
-- `codesign`
-- `cp`
-- `cut`
-- `df`
-- `ditto`
-- `du`
-- `file`
-- `grep`
-- `hdiutil`
-- `mktemp`
-- `ps`
-- `pwd`
-- `rm`
-- `rsync`
-- `script`
-- `seq`
-- `stat`
-- `sw_vers`
-- `sysctl`
-- `tput`
-- `uname`
-- `xattr`
-- `/usr/libexec/PlistBuddy`.
+- `/bin/cp`
+- `/bin/df`
+- `/bin/ps`
+- `/bin/rm`
+- `/usr/bin/awk`
+- `/usr/bin/codesign`
+- `/usr/bin/cut`
+- `/usr/bin/ditto`
+- `/usr/bin/du`
+- `/usr/bin/file`
+- `/usr/bin/find`
+- `/usr/bin/grep`
+- `/usr/bin/hdiutil`
+- `/usr/bin/id`
+- `/usr/bin/mktemp`
+- `/usr/bin/rsync`
+- `/usr/bin/script`
+- `/usr/bin/stat`
+- `/usr/bin/sw_vers`
+- `/usr/bin/tput`
+- `/usr/bin/uname`
+- `/usr/bin/xargs`
+- `/usr/bin/xattr`
+- `/usr/libexec/PlistBuddy`
+- `/usr/sbin/bless`
+- `/usr/sbin/diskutil`
+- `/usr/sbin/sysctl`
 
-Unless you have deliberately modified your system, all of the above commands are available on the macOS versions listed in the section "[Compatibility](#user-content-compatibility)".
+Unless you have deliberately modified your system, all of the above commands are available on the macOS versions listed
+in the section "[Compatibility](#user-content-compatibility)".
 
 ### Exit status and messages
 
-A failure of **createinstalliso** is indicated by a non-zero exit status. Wherever possible, **createinstalliso** uses an exit status and and exit message identical to createinstallmedia.
+A failure of **createinstalliso** is indicated by a non-zero exit status. Wherever possible, **createinstalliso** uses
+an exit status and exit message identical to createinstallmedia.
 
 The table below lists all possible exit status and corresponding messages:
 
@@ -274,7 +309,7 @@ The table below lists all possible exit status and corresponding messages:
 | 242    | Couldn't get installer application display name.                                      |
 | 241    | Couldn't get installer application type.                                              |
 | 240    | Failed to create temporary directory.                                                 |
-| 239    | Couldn't get device ID.                                                               |
+| 239    | Couldn't get device ID for \[DIRECTORY\].                                             |
 | 238    | You need \[VERSION\] or later to create an ISO image from this installer application. |
 | 237    | Failed to delete the \[FILETYPE\] \[FILE\].                                           |
 | 236    | Mount of outer dmg failed.                                                            |
@@ -298,9 +333,24 @@ The table below lists all possible exit status and corresponding messages:
 | 218    | Failed to patch macOS Sierra installer application.                                   |
 | 217    | Failed to replace code signatures.                                                    |
 | 216    | Failed to replace modified files with original ones.                                  |
+| 215    | Couldn't set shell options.                                                           |
+| 214    | Couldn't set shell traps.                                                             |
+| 213    | Couldn't set environment variables.                                                   |
+| 212    | Couldn't set global variables.                                                        |
+| 211    | External command \[FILE\] is missing or can not be executed.                          |
+| 210    | Couldn't get effective user ID.                                                       |
+| 209    | Couldn't create example installer application name.                                   |
+| 208    | Couldn't get number of columns for current terminal.                                  |
+| 207    | Couldn't get Mach-O executable architectures in createinstallmedia.                   |
+| 206    | Couldn't get volume name for \[DIRECTORY\].                                           |
+| 205    | Couldn't get available disk space on the filesystem of \[DIRECTORY\].                 |
+| 204    | Couldn't get total non-empty bytes in disk image \[FILE\].                            |
+| 203    | Couldn't get disk space used by \[DIRECTORY\].                                        |
+| 202    | Couldn't create human-readable byte size for \[INTEGER\].                             |
 
 ## License
 
-Copyright (C) 2021-2024 Michael Berger (BITespresso)
+Copyright (C) 2021-2025 Michael Berger (BITespresso)
 
-**createinstalliso** is licensed under the **GNU General Public License v3 (GPL-3)** (http://www.gnu.org/copyleft/gpl.html).
+**createinstalliso** is licensed under the **GNU General Public License v3 (GPL-3)**
+(http://www.gnu.org/copyleft/gpl.html).
