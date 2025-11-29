@@ -1,0 +1,21 @@
+# Compiled Swift binaries
+createinstalliso-interactive
+
+# macOS application bundles
+*.app
+
+# Swift build artifacts
+*.swiftmodule
+*.swiftdoc
+*.dSYM/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# AppleScript compiled files (keep source)
+*.scpt

@@ -152,6 +152,7 @@ declare +x -r -a EXTERNAL_COMMANDS=(
 
 declare +x g_patch_macos_sierra_installer_application
 declare +x g_replace_code_signatures_in_installer_application
+declare +x g_nointeraction_mode
 declare +x g_user_id
 declare +x g_example_installer_application_name
 declare +x g_shell_columns
@@ -725,6 +726,7 @@ set_environment_variables() {
 set_global_variables() {
   g_patch_macos_sierra_installer_application="false"
   g_replace_code_signatures_in_installer_application="false"
+  g_nointeraction_mode="false"
 
   unset g_tmp_directory || return 1
   unset g_install_esd_mountpoint || return 1
@@ -1773,7 +1775,19 @@ create_install_media() {
   fi
 
   exit_status=0
-  { unused="$({ /usr/bin/script -k -q -- /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  
+  # Use direct execution when in nointeraction mode (called from Swift app) to avoid terminal suspension
+  # Use script wrapper for interactive mode to enable output parsing
+  if [[ "${g_nointeraction_mode}" == "true" ]]; then
+    # Direct execution - no script wrapper (avoids suspension from non-interactive contexts)
+    "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>&1 | while IFS= read -r line; do
+      echo "$line"
+    done
+    exit_status="${PIPESTATUS[0]}"
+  else
+    # Original behavior with script wrapper and output parsing for interactive use
+    { unused="$({ /usr/bin/script -k -q -- /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  fi
 
   if has_script_createinstallmedia_been_canceled_by_sigint "${exit_status}"; then
     kill_process_group_with_signal_name "SIGINT" || true
@@ -1991,7 +2005,19 @@ create_iso_image() {
   [[ -e "${iso_source_image}" ]] || return 1
 
   exit_status=0
-  { unused="$({ /usr/bin/script -k -q -- "${typescript_file}" /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  
+  # Use direct execution when in nointeraction mode (called from Swift app) to avoid terminal suspension
+  # Use script wrapper for interactive mode to enable output parsing
+  if [[ "${g_nointeraction_mode}" == "true" ]]; then
+    # Direct execution - no script wrapper (avoids suspension from non-interactive contexts)
+    /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>&1 | while IFS= read -r line; do
+      echo "$line"
+    done
+    exit_status="${PIPESTATUS[0]}"
+  else
+    # Original behavior with script wrapper and output parsing for interactive use
+    { unused="$({ /usr/bin/script -k -q -- "${typescript_file}" /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+  fi
 
   if has_script_hdiutil_makehybrid_been_canceled_by_sigint "${typescript_file}"; then
     kill_process_group_with_signal_name "SIGINT" || true
@@ -2511,6 +2537,7 @@ main() {
         fi
 
         option_nointeraction="true"
+        g_nointeraction_mode="true"
         ;;
 
       # End of options
