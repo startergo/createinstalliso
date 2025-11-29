@@ -833,8 +833,16 @@ func writeISOToUSB() {
     }
     
     // Validate disk identifier
-    guard diskChoice.hasPrefix("disk") else {
-        UI.printError("Invalid disk identifier. Must start with 'disk'")
+    let diskRegex = try! NSRegularExpression(pattern: "^disk[0-9]+$", options: [])
+    let range = NSRange(location: 0, length: diskChoice.utf16.count)
+    guard diskRegex.firstMatch(in: diskChoice, options: [], range: range) != nil else {
+        UI.printError("Invalid disk identifier. Must match format 'disk' followed by digits (e.g., disk2)")
+        print()
+        UI.pressEnterToContinue()
+        return
+    }
+    if diskChoice == "disk0" {
+        UI.printError("Refusing to write to disk0 (system disk). Please choose an external/removable disk.")
         print()
         UI.pressEnterToContinue()
         return
