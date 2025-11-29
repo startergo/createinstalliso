@@ -470,16 +470,20 @@ func setISOName() {
     print("Default ISO name: \(defaultName).iso")
     print("\nEnter custom ISO name (without .iso extension)")
     print("Press Enter to use default name")
+    print()
+    UI.printInfo("Note: The bash script will create the ISO with the default name,")
+    print("      then it will be renamed to your custom name if specified.")
+    print()
     
     let customName = UI.readLine(prompt: "ISO Name: ")
     
     if customName.isEmpty {
-        config.isoName = "\(defaultName).iso"
-        UI.printSuccess("Using default name: \(config.isoName)")
+        config.isoName = ""
+        UI.printSuccess("Using default name: \(defaultName).iso")
     } else {
         let cleanName = customName.replacingOccurrences(of: ".iso", with: "")
         config.isoName = "\(cleanName).iso"
-        UI.printSuccess("ISO name set to: \(config.isoName)")
+        UI.printSuccess("ISO will be renamed to: \(config.isoName)")
     }
     
     UI.pressEnterToContinue()
@@ -697,6 +701,16 @@ func writeISOToUSB() {
     UI.printHeader()
     print("Write ISO to USB Drive\n")
     
+    // Check for root privileges first
+    if !isRoot() {
+        UI.printWarning("This feature requires root privileges")
+        print("Please run this script with sudo:")
+        print("  sudo ./createinstalliso-interactive")
+        print()
+        UI.pressEnterToContinue()
+        return
+    }
+    
     // Search for ISO files in common locations
     var searchDirectories: [String] = []
     
@@ -884,16 +898,23 @@ func writeISOToUSB() {
     print("Please wait...")
     print()
     
-    let ddCommand = "sudo dd if=\"\(isoPath)\" of=/dev/r\(diskChoice) bs=1m status=progress"
+    // Use BSD dd without GNU-specific status=progress option
+    // Already running as root, no need for sudo
+    let ddCommand = "dd if=\"\(isoPath)\" of=/dev/r\(diskChoice) bs=1m"
     
     if config.debugMode {
         print("[DEBUG] Command: \(ddCommand)")
+        print("[DEBUG] Running as root: \(isRoot())")
         print()
     }
     
     let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/bin/bash")
-    task.arguments = ["-c", ddCommand]
+    task.executableURL = URL(fileURLWithPath: "/bin/dd")
+    task.arguments = [
+        "if=\(isoPath)",
+        "of=/dev/r\(diskChoice)",
+        "bs=1m"
+    ]
     task.standardInput = FileHandle.standardInput
     task.standardOutput = FileHandle.standardOutput
     task.standardError = FileHandle.standardError
