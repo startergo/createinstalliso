@@ -499,7 +499,7 @@ Copyright (C) 2021-2025 Michael Berger <michael.berger@gmx.de>
 ## 📞 Support
 
 **For the Interactive Swift Version:**
-- Built-in help: Press **8** in the app
+- Built-in help: Press **9** in the app
 - This documentation: You're reading it!
 
 **For the Original Bash Script:**
