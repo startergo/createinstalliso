@@ -6,6 +6,6 @@ on run
     
     tell application "Terminal"
         activate
-        do script "cd " & quoted form of scriptDir & " && sudo " & quoted form of executablePath & "; echo ''; echo 'Press any key to close...'; read -n 1; exit"
+        do script "cd " & quoted form of scriptDir & " && sudo " & quoted form of executablePath & "; echo ''; echo 'Press any key to close this window...'; read -n 1; exit"
     end tell
 end run
