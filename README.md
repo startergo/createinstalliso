@@ -350,7 +350,7 @@ The table below lists all possible exit status and corresponding messages:
 
 ## License
 
-Copyright (C) 2021-2024 Michael Berger (BITespresso)
+Copyright (C) 2021-2025 Michael Berger (BITespresso)
 
 **createinstalliso** is licensed under the **GNU General Public License v3 (GPL-3)**
 (http://www.gnu.org/copyleft/gpl.html).
