@@ -680,7 +680,7 @@ func createISO() {
         print()
         if task.terminationStatus == 0 {
             UI.printSuccess("ISO creation completed successfully!")
-        } else if task.terminationStatus != 0 {
+        } else {
             UI.printError("ISO creation failed with exit code \(task.terminationStatus)")
         }
     } catch {
