@@ -228,11 +228,7 @@ func getPlistValue(key: String, plistPath: String) -> String? {
 }
 
 func expandTilde(_ path: String) -> String {
-    if path.hasPrefix("~") {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        return path.replacingOccurrences(of: "~", with: home, range: path.startIndex..<path.index(after: path.startIndex))
-    }
-    return path
+    return NSString(string: path).expandingTildeInPath
 }
 
 // MARK: - Installer Detection
