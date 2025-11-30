@@ -845,7 +845,25 @@ func writeISOToUSB() {
         isoPath = "\(item.path)/\(item.file)"
     } else if choice == "0" {
         let customPath = UI.readLine(prompt: "Enter ISO file path: ")
-        isoPath = expandTilde(customPath)
+        let expandedPath = expandTilde(customPath)
+        let url = URL(fileURLWithPath: expandedPath)
+        // Check for .iso extension (case-insensitive)
+        guard url.path.lowercased().hasSuffix(".iso") else {
+            UI.printError("File does not have a .iso extension: \(expandedPath)")
+            print()
+            UI.pressEnterToContinue()
+            return
+        }
+        // Check that it's a regular file
+        var isRegularFile: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: expandedPath, isDirectory: &isRegularFile)
+        if !exists || !isRegularFile.boolValue {
+            UI.printError("File is not a regular ISO file: \(expandedPath)")
+            print()
+            UI.pressEnterToContinue()
+            return
+        }
+        isoPath = expandedPath
     } else {
         UI.printError("Invalid choice.")
         print()
