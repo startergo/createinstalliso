@@ -1018,9 +1018,9 @@ func writeISOToUSB() {
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/bin/dd")
     task.arguments = [
-        "if=\(isoPath)",
-        "of=/dev/r\(diskChoice)",
-        "bs=1m"
+        "if", isoPath,
+        "of", "/dev/r\(diskChoice)",
+        "bs", "1m"
     ]
     task.standardInput = FileHandle.standardInput
     task.standardOutput = FileHandle.standardOutput
