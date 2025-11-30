@@ -679,20 +679,21 @@ func createISO() {
         scriptArgs.append("--replacecodesignatures")
     }
     
-    let scriptCommand = ([bashScriptPath] + scriptArgs).map { "\"\($0)\"" }.joined(separator: " ")
+    // Prepare debug command string for display
+    let debugCommand = ([bashScriptPath] + scriptArgs).map { "\"\($0)\"" }.joined(separator: " ")
     
     if config.debugMode {
         print("[DEBUG] Script path: \(bashScriptPath)")
         print("[DEBUG] ISO directory: \(config.outputDirectory)")
         print("[DEBUG] Application path: \(config.installerPath)")
-        print("[DEBUG] Full command: \(scriptCommand)")
+        print("[DEBUG] Full command: \(debugCommand)")
         print("[DEBUG] Current directory: \(scriptDirectory)")
         print()
     }
     
     let task = Process()
-    task.executableURL = URL(fileURLWithPath: "/bin/bash")
-    task.arguments = ["-c", scriptCommand]
+    task.executableURL = URL(fileURLWithPath: bashScriptPath)
+    task.arguments = scriptArgs
     task.currentDirectoryURL = URL(fileURLWithPath: scriptDirectory)
     task.environment = ProcessInfo.processInfo.environment
     
