@@ -231,6 +231,39 @@ func expandTilde(_ path: String) -> String {
     return NSString(string: path).expandingTildeInPath
 }
 
+func isDiskExternalOrRemovable(diskIdentifier: String) -> Bool {
+    // Use diskutil info to check if disk is external or removable
+    let result = executeCommand("/usr/sbin/diskutil", arguments: ["info", diskIdentifier])
+    
+    guard result.exitCode == 0 else {
+        return false
+    }
+    
+    let output = result.output.lowercased()
+    
+    // Check for external or removable indicators
+    // Looking for "removable media: yes" or "protocol: usb" or "external: yes"
+    if output.contains("removable media: yes") {
+        return true
+    }
+    
+    if output.contains("protocol: usb") || output.contains("protocol: thunderbolt") {
+        return true
+    }
+    
+    // Check for "device location: external"
+    if output.contains("device location: external") {
+        return true
+    }
+    
+    // Check "solid state: no" combined with external indicators
+    if output.contains("internal: no") {
+        return true
+    }
+    
+    return false
+}
+
 // MARK: - Installer Detection
 
 func getInstallerApplicationDisplayName(_ installerPath: String) -> String? {
