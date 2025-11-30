@@ -497,8 +497,7 @@ func setISOName() {
     print("\nEnter custom ISO name (without .iso extension)")
     print("Press Enter to use default name")
     print()
-    UI.printInfo("Note: The bash script will create the ISO with the default name,")
-    print("      then it will be renamed to your custom name if specified.")
+    UI.printInfo("Note: The ISO will be created with the default name and renamed if you specify a custom name.")
     print()
     
     let customName = UI.readLine(prompt: "ISO Name: ")
