@@ -726,17 +726,41 @@ func createISO() {
             UI.printSuccess("ISO creation completed successfully!")
             
             // Rename ISO if custom name was specified
+            // Note: This assumes the bash script creates an ISO named after the installer application
+            // (e.g., "Install macOS Sonoma.iso" for "Install macOS Sonoma.app")
             if !config.isoName.isEmpty {
                 let defaultName = URL(fileURLWithPath: config.installerPath).deletingPathExtension().lastPathComponent
                 let defaultISOPath = "\(config.outputDirectory)/\(defaultName).iso"
                 let customISOPath = "\(config.outputDirectory)/\(config.isoName)"
                 
-                if fileExists(defaultISOPath) && defaultISOPath != customISOPath {
-                    do {
-                        try FileManager.default.moveItem(atPath: defaultISOPath, toPath: customISOPath)
-                        print("ISO renamed to: \(config.isoName)")
-                    } catch {
-                        UI.printWarning("Could not rename ISO: \(error.localizedDescription)")
+                // Only attempt rename if paths differ
+                if defaultISOPath != customISOPath {
+                    if fileExists(defaultISOPath) {
+                        // Check if target already exists
+                        if fileExists(customISOPath) {
+                            UI.printWarning("Target ISO already exists: \(config.isoName)")
+                            print("Default ISO is available at: \(defaultName).iso")
+                        } else {
+                            do {
+                                try FileManager.default.moveItem(atPath: defaultISOPath, toPath: customISOPath)
+                                print("ISO renamed to: \(config.isoName)")
+                            } catch {
+                                UI.printWarning("Could not rename ISO: \(error.localizedDescription)")
+                                print("ISO is available at: \(defaultName).iso")
+                            }
+                        }
+                    } else {
+                        // Default ISO not found - report what we expected
+                        UI.printWarning("Expected ISO file not found: \(defaultName).iso")
+                        print("Check output directory for ISO file.")
+                        
+                        // Try to find any ISO files created
+                        if let files = try? FileManager.default.contentsOfDirectory(atPath: config.outputDirectory) {
+                            let isoFiles = files.filter { $0.hasSuffix(".iso") }
+                            if !isoFiles.isEmpty {
+                                print("Found ISO file(s): \(isoFiles.joined(separator: ", "))")
+                            }
+                        }
                     }
                 }
             }
