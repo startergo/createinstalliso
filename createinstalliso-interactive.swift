@@ -953,6 +953,14 @@ func writeISOToUSB() {
     // Warn if disk0 is selected, but allow if it is external/removable
     if diskChoice == "disk0" {
         print("Warning: disk0 is typically the system disk. Proceed only if you are certain it is external/removable.")
+        print("To proceed with disk0, you must type the following phrase exactly: I UNDERSTAND THE RISK")
+        let disk0Confirmation = UI.readLine(prompt: "Type 'I UNDERSTAND THE RISK' to continue, or anything else to cancel: ")
+        if disk0Confirmation != "I UNDERSTAND THE RISK" {
+            print("Operation cancelled.")
+            print()
+            UI.pressEnterToContinue()
+            return
+        }
     }
     
     // Check if the selected disk is external/removable
