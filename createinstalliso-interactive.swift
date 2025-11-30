@@ -879,9 +879,9 @@ func writeISOToUSB() {
             return
         }
         // Check that it's a regular file
-        var isRegularFile: ObjCBool = false
-        let exists = FileManager.default.fileExists(atPath: expandedPath, isDirectory: &isRegularFile)
-        if !exists || !isRegularFile.boolValue {
+        var isDirectory: ObjCBool = false
+        let exists = FileManager.default.fileExists(atPath: expandedPath, isDirectory: &isDirectory)
+        if !exists || isDirectory.boolValue {
             UI.printError("File is not a regular ISO file: \(expandedPath)")
             print()
             UI.pressEnterToContinue()
