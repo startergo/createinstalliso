@@ -783,9 +783,10 @@ func writeISOToUSB() {
         "\(homeDir)/Documents"
     ])
     
-    // Remove duplicates
-    searchDirectories = Array(Set(searchDirectories))
-    
+    // Remove duplicates, preserving order
+    searchDirectories = searchDirectories.reduce(into: []) { result, dir in
+        if !result.contains(dir) { result.append(dir) }
+    }
     // Find all ISO files
     var isoFileMap: [(path: String, file: String)] = []
     
