@@ -719,16 +719,7 @@ func writeISOToUSB() {
     }
     
     // Get the real user's home directory (even when running as sudo)
-    var homeDir = FileManager.default.homeDirectoryForCurrentUser.path
-    
-    // If running as root, try to get the actual user's home directory
-    if let sudoUser = ProcessInfo.processInfo.environment["SUDO_USER"] {
-        if let userHomeDir = ProcessInfo.processInfo.environment["HOME"]?.replacingOccurrences(of: "/var/root", with: "/Users/\(sudoUser)") {
-            homeDir = userHomeDir
-        } else {
-            homeDir = "/Users/\(sudoUser)"
-        }
-    }
+    let homeDir = getRealUserHomeDirectory()
     
     searchDirectories.append(contentsOf: [
         "\(homeDir)/Downloads",
