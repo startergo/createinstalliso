@@ -129,7 +129,7 @@ ISO Name: [press Enter or type custom name]
 ### Step 5: Configure Options (Optional - Press 4 or 5)
 
 **Option 4: Patch macOS Sierra**
-- Only needed for defective Sierra installer version 12.6.06
+- Only needed for defective Sierra installer build 12.6.06
 - Press 4 to toggle: `[ ]` → `[✓]`
 
 **Option 5: Replace Code Signatures**
