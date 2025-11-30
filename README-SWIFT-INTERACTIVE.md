@@ -471,10 +471,10 @@ See **BUILD.md** for creating a sudo-enabled app that finds the binary automatic
 - Native Swift ISO creation logic
 
 **Current Behavior:**
-When you press "Create ISO", the app shows you the command to run with the original bash script. The interactive configuration is complete and working - it validates everything and builds the correct command for you.
+When you press "Create ISO", the app acts as a GUI wrapper and directly executes the original bash script with the configured parameters. The interactive configuration is complete and working—it validates everything, builds the correct command, and runs it for you.
 
 **Future Updates:**
-Will add native Swift implementation of the ISO creation process to make it fully self-contained.
+Will add a native Swift implementation of the ISO creation process to make the app fully self-contained (removing the dependency on the bash script).
 
 ---
 
