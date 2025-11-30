@@ -904,10 +904,10 @@ func writeISOToUSB() {
     
     // Use BSD dd without GNU-specific status=progress option
     // Already running as root, no need for sudo
-    let ddCommand = "dd if=\"\(isoPath)\" of=/dev/r\(diskChoice) bs=1m"
+    
     
     if config.debugMode {
-        print("[DEBUG] Command: \(ddCommand)")
+        print("[DEBUG] Command: dd if=\"\(isoPath)\" of=/dev/r\(diskChoice) bs=1m")
         print("[DEBUG] Running as root: \(isRoot())")
         print()
     }
