@@ -71,8 +71,6 @@ class Configuration {
     var installerPath: String = ""
     var outputDirectory: String = ""
     var isoName: String = ""
-    var patchSierra: Bool = false
-    var replaceSignatures: Bool = false
     var installerDisplayName: String = ""
     var installerType: InstallerType = .unknown
     var debugMode: Bool = false
@@ -347,16 +345,11 @@ func showMainMenu() {
     }
     
     UI.printSeparator()
-    print("\nOptions:")
-    print("4. [\(config.patchSierra ? "✓" : " ")] Patch macOS Sierra Installer (version 12.6.06)")
-    print("5. [\(config.replaceSignatures ? "✓" : " ")] Replace Code Signatures")
-    
-    UI.printSeparator()
     print("\nActions:")
-    print("6. Create ISO Image")
-    print("7. Write ISO to USB Drive")
-    print("8. View System Information")
-    print("9. Help")
+    print("4. Create ISO Image")
+    print("5. Write ISO to USB Drive")
+    print("6. View System Information")
+    print("7. Help")
     print("0. Exit")
     
     UI.printSeparator()
@@ -514,14 +507,6 @@ func setISOName() {
     UI.pressEnterToContinue()
 }
 
-func togglePatchSierra() {
-    config.patchSierra.toggle()
-}
-
-func toggleReplaceSignatures() {
-    config.replaceSignatures.toggle()
-}
-
 func showSystemInformation() {
     UI.printHeader()
     print("System Information\n")
@@ -612,12 +597,6 @@ func createISO() {
     print("  Type: \(config.installerType.description)")
     print("  Output: \(config.outputDirectory)")
     print("  ISO Name: \(config.isoName.isEmpty ? "[Auto-generate]" : config.isoName)")
-    if config.patchSierra {
-        print("  Options: Patch Sierra")
-    }
-    if config.replaceSignatures {
-        print("  Options: Replace Signatures")
-    }
     UI.printSeparator()
     
     // Check root requirement
@@ -663,20 +642,12 @@ func createISO() {
     print()
     
     // Execute bash script directly - the Terminal already has proper sudo
-    // Build command with options
-    var scriptArgs = [
+    // Build command with available bash script options
+    let scriptArgs = [
         "--isodirectory", config.outputDirectory,
         "--applicationpath", config.installerPath,
         "--nointeraction"
     ]
-    
-    // Add optional flags
-    if config.patchSierra {
-        scriptArgs.append("--patchsierrainstaller")
-    }
-    if config.replaceSignatures {
-        scriptArgs.append("--replacecodesignatures")
-    }
     
     // Prepare debug command string for display
     let debugCommand = ([bashScriptPath] + scriptArgs).map { "\"\($0)\"" }.joined(separator: " ")
@@ -1080,16 +1051,12 @@ func main() {
         case "3":
             setISOName()
         case "4":
-            togglePatchSierra()
-        case "5":
-            toggleReplaceSignatures()
-        case "6":
             createISO()
-        case "7":
+        case "5":
             writeISOToUSB()
-        case "8":
+        case "6":
             showSystemInformation()
-        case "9":
+        case "7":
             showHelp()
         case "0":
             UI.printHeader()
