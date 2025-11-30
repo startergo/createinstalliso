@@ -1780,24 +1780,26 @@ create_install_media() {
   # Use script wrapper for interactive mode to enable output parsing
   if [[ "${g_nointeraction_mode}" == "true" ]]; then
     # Direct execution - no script wrapper (avoids suspension from non-interactive contexts)
+    # Build argument array for createinstallmedia
+    local +x args=("--volume" "/Volumes/${install_disk_volname}")
     if [[ -n "${applicationpath_option_name}" && -n "${applicationpath_option_parameter}" ]]; then
-      "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>&1 | while IFS= read -r line; do
-        echo "$line"
-      done
-      exit_status="${PIPESTATUS[0]}"
-    else
-      "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" --nointeraction 2>&1 | while IFS= read -r line; do
-        echo "$line"
-      done
-      exit_status="${PIPESTATUS[0]}"
+      args+=("${applicationpath_option_name}" "${applicationpath_option_parameter}")
     fi
+    args+=("--nointeraction")
+
+    "${installer_application_path}/Contents/Resources/createinstallmedia" "${args[@]}" 2>&1 | while IFS= read -r line; do
+      echo "$line"
+    done
+    exit_status="${PIPESTATUS[0]}"
   else
     # Original behavior with script wrapper and output parsing for interactive use
+    local +x args=("--volume" "/Volumes/${install_disk_volname}")
     if [[ -n "${applicationpath_option_name}" && -n "${applicationpath_option_parameter}" ]]; then
-      { unused="$({ /usr/bin/script -k -q -- /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" "${applicationpath_option_name}" "${applicationpath_option_parameter}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
-    else
-      { unused="$({ /usr/bin/script -k -q -- /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" --volume "/Volumes/${install_disk_volname}" --nointeraction 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
+      args+=("${applicationpath_option_name}" "${applicationpath_option_parameter}")
     fi
+    args+=("--nointeraction")
+
+    { unused="$({ /usr/bin/script -k -q -- /dev/null "${installer_application_path}/Contents/Resources/createinstallmedia" "${args[@]}" 2>/dev/null > >(parse_create_install_media); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
   fi
 
   if has_script_createinstallmedia_been_canceled_by_sigint "${exit_status}"; then
