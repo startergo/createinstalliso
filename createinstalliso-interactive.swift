@@ -858,6 +858,14 @@ func writeISOToUSB() {
         return
     }
     
+    // Check if the selected disk is external/removable
+    if !isDiskExternalOrRemovable(diskIdentifier: diskChoice) {
+        UI.printError("Refusing to write to /dev/\(diskChoice) because it is not detected as external or removable. Please choose an external/removable disk.")
+        print()
+        UI.pressEnterToContinue()
+        return
+    }
+    
     print()
     print("You are about to write:")
     print("  ISO: \(isoPath)")
