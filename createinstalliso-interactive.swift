@@ -256,7 +256,7 @@ func isDiskExternalOrRemovable(diskIdentifier: String) -> Bool {
         return true
     }
     
-    // Check "solid state: no" combined with external indicators
+    // Check if device is not internal
     if output.contains("internal: no") {
         return true
     }
