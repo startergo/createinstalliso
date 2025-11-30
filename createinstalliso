@@ -2021,10 +2021,11 @@ create_iso_image() {
   # Use script wrapper for interactive mode to enable output parsing
   if [[ "${g_nointeraction_mode}" == "true" ]]; then
     # Direct execution - no script wrapper (avoids suspension from non-interactive contexts)
-    /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>&1 | while IFS= read -r line; do
+    output="$(/usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>&1)"
+    exit_status="$?"
+    while IFS= read -r line; do
       echo "$line"
-    done
-    exit_status="${PIPESTATUS[0]}"
+    done <<< "$output"
   else
     # Original behavior with script wrapper and output parsing for interactive use
     { unused="$({ /usr/bin/script -k -q -- "${typescript_file}" /usr/bin/hdiutil makehybrid -o "${iso_destination_image}" "$(get_argument_safe_path "${iso_source_image}")" -hfs -udf -default-volume-name "${default_volume_name}" 2>/dev/null > >(parse_create_iso_image); } 3>&1 >&4 4>&-)"; } 4>&1 || exit_status="$?"
