@@ -420,7 +420,7 @@ func selectCustomInstallerPath() {
             config.installerType = getInstallerType(path)
             UI.printSuccess("Selected: \(displayName)")
         } else {
-            UI.printError("Not a valid macOS installer application")
+            UI.printError("Path exists but is not a recognized macOS installer. Please ensure it contains Contents/Info.plist with CFBundleDisplayName and is one of the supported installer types (Lion through Sequoia).")
         }
     } else {
         UI.printError("Path does not exist")
