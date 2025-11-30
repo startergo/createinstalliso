@@ -422,16 +422,13 @@ func selectOutputDirectory() {
     
     switch choice {
     case "1":
-        let userHome = getRealUserHomeDirectory()
-        config.outputDirectory = (userHome as NSString).appendingPathComponent("Desktop")
+        config.outputDirectory = desktopPath
         UI.printSuccess("Output directory set to Desktop")
     case "2":
-        let userHome = getRealUserHomeDirectory()
-        config.outputDirectory = (userHome as NSString).appendingPathComponent("Downloads")
+        config.outputDirectory = downloadsPath
         UI.printSuccess("Output directory set to Downloads")
     case "3":
-        let userHome = getRealUserHomeDirectory()
-        config.outputDirectory = (userHome as NSString).appendingPathComponent("Documents")
+        config.outputDirectory = documentsPath
         UI.printSuccess("Output directory set to Documents")
     case "4":
         config.outputDirectory = FileManager.default.currentDirectoryPath
@@ -630,16 +627,30 @@ func createISO() {
         return
     }
     
-    // Note: The bash script doesn't have an ISO name parameter, it auto-generates
-    // So we ignore config.isoName
+    // Note: The bash script auto-generates the ISO name based on installer name
+    // If user specified a custom name, we'll rename the ISO after creation
     
     print()
     print("Launching ISO creation in bash...")
     print()
     
     // Execute bash script directly - the Terminal already has proper sudo
-    // We'll use a subshell to execute it with --nointeraction flag
-    let scriptCommand = "\(bashScriptPath) --isodirectory \"\(config.outputDirectory)\" --applicationpath \"\(config.installerPath)\" --nointeraction"
+    // Build command with options
+    var scriptArgs = [
+        "--isodirectory", config.outputDirectory,
+        "--applicationpath", config.installerPath,
+        "--nointeraction"
+    ]
+    
+    // Add optional flags
+    if config.patchSierra {
+        scriptArgs.append("--patchsierrainstaller")
+    }
+    if config.replaceSignatures {
+        scriptArgs.append("--replacecodesignatures")
+    }
+    
+    let scriptCommand = ([bashScriptPath] + scriptArgs).map { "\"\($0)\"" }.joined(separator: " ")
     
     if config.debugMode {
         print("[DEBUG] Script path: \(bashScriptPath)")
@@ -684,6 +695,22 @@ func createISO() {
         print()
         if task.terminationStatus == 0 {
             UI.printSuccess("ISO creation completed successfully!")
+            
+            // Rename ISO if custom name was specified
+            if !config.isoName.isEmpty {
+                let defaultName = URL(fileURLWithPath: config.installerPath).deletingPathExtension().lastPathComponent
+                let defaultISOPath = "\(config.outputDirectory)/\(defaultName).iso"
+                let customISOPath = "\(config.outputDirectory)/\(config.isoName)"
+                
+                if fileExists(defaultISOPath) && defaultISOPath != customISOPath {
+                    do {
+                        try FileManager.default.moveItem(atPath: defaultISOPath, toPath: customISOPath)
+                        print("ISO renamed to: \(config.isoName)")
+                    } catch {
+                        UI.printWarning("Could not rename ISO: \(error.localizedDescription)")
+                    }
+                }
+            }
         } else {
             UI.printError("ISO creation failed with exit code \(task.terminationStatus)")
         }
